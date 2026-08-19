@@ -1,35 +1,46 @@
 <?php
+/**
+ * DigiLens Snapshot Renderer & HTML Rewriter
+ *
+ * @package DigiLens
+ */
+
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 function digilens_normalize_snapshot_path( $path ) {
-    $path = str_replace( '\\', '/', (string) $path );
-    // Cyotek/WebCopy encodes U+202F in filenames as the literal token #U202f.
-    $path = str_replace( "\xE2\x80\xAF", '#U202f', $path );
-    $parts = array();
-    foreach ( explode( '/', $path ) as $part ) {
-        if ( $part === '' || $part === '.' ) { continue; }
-        if ( $part === '..' ) { array_pop( $parts ); continue; }
-        $parts[] = $part;
-    }
-    return implode( '/', $parts );
+    $path = trim( str_replace( '\\', '/', $path ), '/' );
+    return preg_replace( '#/+#', '/', $path );
+}
+
+function digilens_snapshot_route_from_html( $rel ) {
+    $rel = digilens_normalize_snapshot_path( $rel );
+    if ( $rel === 'index.htm' || $rel === '' ) { return ''; }
+    $route = preg_replace( '#(?:/)?index\.htm$#i', '', $rel );
+    $route = preg_replace( '/\.htm$/i', '', $route );
+    return trim( $route, '/' );
 }
 
 function digilens_snapshot_candidates_for_request() {
-    $path = parse_url( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '/', PHP_URL_PATH );
-    $path = trim( rawurldecode( (string) $path ), '/' );
-    $candidates = array();
-    if ( $path === '' ) {
-        $candidates[] = 'index.htm';
-    } else {
-        $candidates[] = $path . '/index.htm';
-        $candidates[] = $path . '.htm';
-        $candidates[] = $path;
-    }
-    return array_values( array_unique( $candidates ) );
+    $uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '/';
+    $path = trim( (string) wp_parse_url( $uri, PHP_URL_PATH ), '/' );
+    if ( $path === '' ) { return array( 'index.htm' ); }
+    return array(
+        $path . '/index.htm',
+        $path . '.htm',
+        $path,
+    );
 }
 
 function digilens_snapshot_for_current_request() {
     if ( is_admin() ) { return false; }
+    if ( is_single() || is_singular( 'post' ) || is_category() || is_tag() || is_tax() || is_home() || is_archive() || is_search() ) {
+        return false;
+    }
+
+    $queried_id = get_queried_object_id();
+    if ( $queried_id && get_post_type( $queried_id ) === 'post' ) {
+        return false;
+    }
 
     // 1. Ưu tiên kiểm tra file snapshot theo đúng đường dẫn REQUEST_URI thực tế
     foreach ( digilens_snapshot_candidates_for_request() as $rel ) {
@@ -40,9 +51,8 @@ function digilens_snapshot_for_current_request() {
     }
 
     // 2. Fallback về post meta nếu không match trực tiếp từ URI
-    $post_id = get_queried_object_id();
-    if ( $post_id ) {
-        $meta = get_post_meta( $post_id, '_digilens_snapshot_path', true );
+    if ( $queried_id ) {
+        $meta = get_post_meta( $queried_id, '_digilens_snapshot_path', true );
         if ( $meta ) {
             $meta = digilens_normalize_snapshot_path( $meta );
             $file = DIGILENS_SNAPSHOT_DIR . '/' . $meta;
@@ -53,84 +63,74 @@ function digilens_snapshot_for_current_request() {
     return false;
 }
 
-
 function digilens_snapshot_asset_url( $local_path ) {
-    $segments = array_map( 'rawurlencode', explode( '/', ltrim( $local_path, '/' ) ) );
-    return trailingslashit( DIGILENS_SNAPSHOT_URI ) . implode( '/', $segments );
+    $local_path = digilens_normalize_snapshot_path( $local_path );
+    return trailingslashit( DIGILENS_SNAPSHOT_URI ) . ltrim( $local_path, '/' );
 }
 
-function digilens_snapshot_route_from_html( $rel ) {
-    $rel = digilens_normalize_snapshot_path( $rel );
-    if ( $rel === 'index.htm' ) { return '/'; }
-    $route = preg_replace( '#/index\.htm$#i', '/', $rel );
-    if ( $route === $rel ) { $route = preg_replace( '/\.htm$/i', '/', $route ); }
-    return '/' . ltrim( $route, '/' );
-}
-
-function digilens_resolve_relative_path( $base_file, $url_path ) {
-    $url_path = rawurldecode( $url_path );
-    if ( strpos( $url_path, '/' ) === 0 ) {
-        return digilens_normalize_snapshot_path( ltrim( $url_path, '/' ) );
-    }
-    $base_dir = dirname( str_replace( '\\', '/', $base_file ) );
-    if ( $base_dir === '.' ) { $base_dir = ''; }
-    return digilens_normalize_snapshot_path( trim( $base_dir . '/' . $url_path, '/' ) );
-}
-
-function digilens_rewrite_url( $url, $snapshot_rel ) {
-    $original = $url;
-    $url = html_entity_decode( trim( (string) $url ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-    if ( $url === '' || $url[0] === '#' || preg_match( '#^(?:mailto:|tel:|javascript:|data:|blob:)#i', $url ) ) { return $original; }
-
-    $scheme_relative = strpos( $url, '//' ) === 0;
-    $is_absolute = (bool) preg_match( '#^https?://#i', $url ) || $scheme_relative;
-    $query = '';
-    $fragment = '';
-    $local_path = '';
-
-    if ( $is_absolute ) {
-        $parse_url = $scheme_relative ? 'https:' . $url : $url;
-        $parts = wp_parse_url( $parse_url );
-        $host = isset( $parts['host'] ) ? strtolower( $parts['host'] ) : '';
-        if ( ! in_array( $host, array( 'www.digilens.com', 'digilens.com', 'staging.digilens.com' ), true ) ) { return $original; }
-        $local_path = digilens_normalize_snapshot_path( ltrim( isset( $parts['path'] ) ? $parts['path'] : '', '/' ) );
-        $query = isset( $parts['query'] ) ? '?' . $parts['query'] : '';
-        $fragment = isset( $parts['fragment'] ) ? '#' . $parts['fragment'] : '';
-    } else {
-        $hash_pos = strpos( $url, '#' );
-        if ( $hash_pos !== false ) { $fragment = substr( $url, $hash_pos ); $url = substr( $url, 0, $hash_pos ); }
-        $q_pos = strpos( $url, '?' );
-        if ( $q_pos !== false ) { $query = substr( $url, $q_pos ); $url = substr( $url, 0, $q_pos ); }
-        $local_path = digilens_resolve_relative_path( $snapshot_rel, $url );
+function digilens_rewrite_url( $original, $snapshot_rel ) {
+    $trimmed = trim( $original );
+    if ( $trimmed === '' || preg_match( '~^(?:#|javascript:|mailto:|tel:|data:)~i', $trimmed ) ) {
+        return $original;
     }
 
-    if ( $local_path === '' ) { return home_url( '/' ) . $query . $fragment; }
+    $parts = wp_parse_url( $trimmed );
+    $host = isset( $parts['host'] ) ? strtolower( $parts['host'] ) : '';
+    $path = isset( $parts['path'] ) ? $parts['path'] : '';
+    $query = isset( $parts['query'] ) ? '?' . $parts['query'] : '';
+    $fragment = isset( $parts['fragment'] ) ? '#' . $parts['fragment'] : '';
 
-    $candidate = DIGILENS_SNAPSHOT_DIR . '/' . $local_path;
-    $html_candidate = is_dir( $candidate ) ? rtrim( $candidate, '/' ) . '/index.htm' : '';
-
-    if ( preg_match( '/\.htm$/i', $local_path ) && is_file( $candidate ) ) {
-        // Infrastructure captures are assets/endpoints, not public pages.
-        if ( preg_match( '#^(?:wp-json|feed|comments/feed|forms/|gtag/)#i', $local_path ) ) {
-            return digilens_snapshot_asset_url( $local_path ) . $query . $fragment;
+    $allowed_hosts = array( 'www.digilens.com', 'digilens.com' );
+    $is_absolute = false;
+    if ( $host !== '' ) {
+        if ( ! in_array( $host, $allowed_hosts, true ) ) {
+            return $original;
         }
-        return home_url( digilens_snapshot_route_from_html( $local_path ) ) . $query . $fragment;
+        $is_absolute = true;
     }
-    if ( $html_candidate && is_file( $html_candidate ) ) {
-        $rel_html = ltrim( str_replace( DIGILENS_SNAPSHOT_DIR, '', $html_candidate ), '/' );
-        return home_url( digilens_snapshot_route_from_html( $rel_html ) ) . $query . $fragment;
+
+    if ( $path === '' || $path === '/' ) {
+        return home_url( '/' ) . $query . $fragment;
+    }
+
+    $current_dir = dirname( $snapshot_rel );
+    if ( $current_dir === '.' ) { $current_dir = ''; }
+
+    if ( strpos( $path, '/' ) === 0 || $is_absolute ) {
+        $local_path = ltrim( $path, '/' );
+    } else {
+        $combined = ( $current_dir !== '' ? $current_dir . '/' : '' ) . $path;
+        $segments = array();
+        foreach ( explode( '/', str_replace( '\\', '/', $combined ) ) as $segment ) {
+            if ( $segment === '' || $segment === '.' ) { continue; }
+            if ( $segment === '..' ) { array_pop( $segments ); continue; }
+            $segments[] = $segment;
+        }
+        $local_path = implode( '/', $segments );
+    }
+
+    $local_path = digilens_normalize_snapshot_path( $local_path );
+    $candidate = DIGILENS_SNAPSHOT_DIR . '/' . $local_path;
+
+    if ( is_dir( $candidate ) && is_file( $candidate . '/index.htm' ) ) {
+        $route = digilens_snapshot_route_from_html( $local_path . '/index.htm' );
+        return home_url( '/' . ( $route !== '' ? $route . '/' : '' ) ) . $query . $fragment;
+    }
+    if ( is_file( $candidate ) && preg_match( '/\.htm$/i', $candidate ) ) {
+        $route = digilens_snapshot_route_from_html( $local_path );
+        return home_url( '/' . ( $route !== '' ? $route . '/' : '' ) ) . $query . $fragment;
     }
     if ( is_file( $candidate ) ) {
         return digilens_snapshot_asset_url( $local_path ) . $query . $fragment;
     }
 
-    // If WebCopy missed a known original asset, keep a remote fallback instead of producing a broken local URL.
+    // Fallback for assets
     if ( preg_match( '#^(?:wp-content|wp-includes|gtag|forms|@googlemaps|s|af|count)/#i', $local_path ) ) {
         if ( $is_absolute ) { return $original; }
         return 'https://www.digilens.com/' . implode( '/', array_map( 'rawurlencode', explode( '/', $local_path ) ) ) . $query . $fragment;
     }
 
-    // Internal page link not captured locally: keep it on this WordPress site.
+    // Internal page link not captured locally
     if ( $is_absolute || preg_match( '/(?:index\.htm|\.htm)$/i', $local_path ) ) {
         $route = preg_replace( '#(?:/)?index\.htm$#i', '/', $local_path );
         $route = preg_replace( '/\.htm$/i', '/', $route );
@@ -139,102 +139,21 @@ function digilens_rewrite_url( $url, $snapshot_rel ) {
     return $original;
 }
 
-function digilens_translate_header( $html ) {
-    $replacements = array(
-        '>Waveguides<'                          => '>Ống dẫn sóng<',
-        '>WAVEGUIDES<'                          => '>Ống dẫn sóng<',
-        '>Partners<'                            => '>Đối tác<',
-        '>PARTNERS<'                            => '>Đối tác<',
-        '>About<'                               => '>Giới thiệu<',
-        '>ABOUT<'                               => '>Giới thiệu<',
-        '>Developer Portal<'                    => '>Cổng thông tin nhà phát triển<',
-        '>DEVELOPER PORTAL<'                    => '>Cổng thông tin nhà phát triển<',
-        '>Company<'                             => '>Công ty<',
-        '>Media Center<'                        => '>Trung tâm truyền thông<',
-        '>Careers<'                             => '>Tuyển dụng<',
-        '>Contact<'                             => '>Liên hệ<',
-        'aria-label="Site Navigation: Primary"'  => 'aria-label="Điều hướng website: Điều hướng chính"',
-        'aria-label="Main Menu"'                => 'aria-label="Menu chính"',
-        'aria-label="Toggle Dropdown Menu"'      => 'aria-label="Mở/đóng menu"',
-        '<span class="screen-reader-text">Main Menu</span>'   => '<span class="screen-reader-text">Menu chính</span>',
-        '<span class="screen-reader-text">Toggle Menu</span>' => '<span class="screen-reader-text">Mở/đóng menu</span>',
-    );
-    return str_replace( array_keys( $replacements ), array_values( $replacements ), $html );
-}
-
-function digilens_replace_main_content( $html, $snapshot_rel ) {
-    // By default, serve the fully translated snapshot directly.
-    return apply_filters( 'digilens_serve_snapshot_main', $html, $snapshot_rel );
-}
-
-function digilens_native_form_markup( $type = 'contact' ) {
-    $sent = isset( $_GET['dl_sent'] ) ? sanitize_key( wp_unslash( $_GET['dl_sent'] ) ) : '';
-    $notice = '';
-    if ( $sent === $type ) { $notice = '<div class="digilens-form-notice">Cảm ơn bạn. Yêu cầu đã được gửi thành công.</div>'; }
-
-    $action = esc_url( admin_url( 'admin-post.php' ) );
-    $nonce = wp_nonce_field( 'digilens_' . $type, '_dl_nonce', true, false );
-    if ( $type === 'newsletter' ) {
-        return $notice . '<form class="digilens-native-form" method="post" action="' . $action . '">' . $nonce .
-            '<input type="hidden" name="action" value="digilens_newsletter">' .
-            '<label>Email<input type="email" name="email" required autocomplete="email"></label>' .
-            '<label class="dl-hp">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>' .
-            '<button type="submit">Đăng ký</button></form>';
+function digilens_replace_entire_header( $html ) {
+    if ( function_exists( 'digilens_render_master_header' ) ) {
+        $master_header = digilens_render_master_header();
+        $pattern = '#<header\b[^>]*id=["\']masthead["\'][^>]*>.*?</header>#is';
+        if ( preg_match( $pattern, $html ) ) {
+            return preg_replace( $pattern, $master_header, $html, 1 );
+        }
     }
-    return $notice . '<form class="digilens-native-form" method="post" action="' . $action . '">' . $nonce .
-        '<input type="hidden" name="action" value="digilens_contact">' .
-        '<div class="dl-row"><label>Họ và tên<input type="text" name="name" required autocomplete="name"></label><label>Email<input type="email" name="email" required autocomplete="email"></label></div>' .
-        '<div class="dl-row"><label>Công ty<input type="text" name="company" autocomplete="organization"></label><label>Số điện thoại<input type="tel" name="phone" autocomplete="tel"></label></div>' .
-        '<label>Nội dung<textarea name="message" required></textarea></label>' .
-        '<label class="dl-hp">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>' .
-        '<button type="submit">Gửi yêu cầu</button></form>';
-}
-
-function digilens_replace_hubspot_forms( $html ) {
-    $forms = array(
-        'c5265497-b30e-4bec-ab39-f832063f1401' => 'contact',
-        'c43fead5-e9a3-4760-a56b-8d8b68ba70c4' => 'newsletter',
-        'e6e8e8cc-c724-4c02-8710-12c785ae0892' => 'contact',
-    );
-    foreach ( $forms as $id => $type ) {
-        $pattern = '#<script>\s*window\.hsFormsOnReady.*?formId:\s*["\']' . preg_quote( $id, '#' ) . '["\'].*?</script>\s*<div class="hbspt-form"[^>]*></div>#is';
-        $html = preg_replace( $pattern, digilens_native_form_markup( $type ), $html );
-    }
-    return $html;
-}
-
-function digilens_strip_cookie_consent( $html ) {
-    // 1. Remove the cookie law info banner markup and modal block
-    $html = preg_replace( '#<!--googleoff:\s*all-->\s*<div[^>]*id=["\']cookie-law-info-bar["\'].*?<!--googleon:\s*all-->#is', '', $html );
-    $html = preg_replace( '#<div\b[^>]*id=["\']cookie-law-info-bar["\'][^>]*>.*?</div>\s*</span>\s*</div>#is', '', $html );
-    $html = preg_replace( '#<div\b[^>]*id=["\']cookie-law-info-again["\'][^>]*>.*?</div>#is', '', $html );
-    $html = preg_replace( '#<div\b[^>]*id=["\']cliSettingsPopup["\'][^>]*>.*?(?:<div class=["\']cli-modal-backdrop[^>]*></div>\s*)+#is', '', $html );
-    $html = preg_replace( '#<div\b[^>]*class=["\'][^"\']*cli-modal-backdrop[^"\']*["\'][^>]*></div>#is', '', $html );
-
-    // 2. Remove cookie law info stylesheets and scripts
-    $html = preg_replace( '#<link\b[^>]*id=["\']cookie-law-info[^"\'\s>]*["\'][^>]*>#is', '', $html );
-    $html = preg_replace( '#<script\b[^>]*id=["\']cookie-law-info[^"\'\s>]*["\'][^>]*>.*?</script>#is', '', $html );
-    $html = preg_replace( '#<script\b[^>]*src=["\'][^"\']*cookie-law-info[^"\']*["\'][^>]*>\s*</script>#is', '', $html );
-
-    // 3. Remove inline script configuration
-    $html = preg_replace( '#<script\b[^>]*>\s*var\s+Cli_Data\s*=.*?</script>#is', '', $html );
-    $html = preg_replace( '#<script\b[^>]*>\s*var\s+cli_cookiebar_settings\s*=.*?</script>#is', '', $html );
-
-    return $html;
-}
-
-function digilens_strip_footer_newsletter( $html ) {
-    // Remove the 4th footer column (newsletter subscription form & heading)
-    $html = preg_replace(
-        '#<div\b[^>]*class=["\'][^"\']*elementor-element-44d31cd8[^"\']*["\'][^>]*>.*?</div>\s*</div>\s*</div>#is',
-        '',
-        $html
-    );
     return $html;
 }
 
 function digilens_build_complete_footer() {
-    $logo_url = digilens_snapshot_asset_url( 'wp-content/uploads/2021/03/LRG-Logo-White-Full-MAR21.png' );
+    $logo_url = function_exists( 'digilens_snapshot_asset_url' )
+        ? digilens_snapshot_asset_url( 'wp-content/uploads/2021/03/LRG-Logo-White-Full-MAR21.png' )
+        : get_template_directory_uri() . '/snapshot/wp-content/uploads/2021/03/LRG-Logo-White-Full-MAR21.png';
     $home_url = esc_url( home_url( '/' ) );
 
     return '<footer class="digilens-master-footer">
@@ -420,8 +339,60 @@ function digilens_replace_entire_footer( $html ) {
     return $html;
 }
 
+function digilens_strip_cookie_consent( $html ) {
+    $html = preg_replace( '#<!--googleoff:\s*all-->\s*<div[^>]*id=["\']cookie-law-info-bar["\'].*?<!--googleon:\s*all-->#is', '', $html );
+    $html = preg_replace( '#<div\b[^>]*id=["\']cookie-law-info-bar["\'][^>]*>.*?</div>\s*</span>\s*</div>#is', '', $html );
+    $html = preg_replace( '#<div\b[^>]*id=["\']cookie-law-info-again["\'][^>]*>.*?</div>#is', '', $html );
+    $html = preg_replace( '#<div\b[^>]*id=["\']cliSettingsPopup["\'][^>]*>.*?(?:<div class=["\']cli-modal-backdrop[^>]*></div>\s*)+#is', '', $html );
+    $html = preg_replace( '#<div\b[^>]*class=["\'][^"\']*cli-modal-backdrop[^"\']*["\'][^>]*></div>#is', '', $html );
+
+    $html = preg_replace( '#<link\b[^>]*id=["\']cookie-law-info[^"\'\s>]*["\'][^>]*>#is', '', $html );
+    $html = preg_replace( '#<script\b[^>]*id=["\']cookie-law-info[^"\'\s>]*["\'][^>]*>.*?</script>#is', '', $html );
+    $html = preg_replace( '#<script\b[^>]*src=["\'][^"\']*cookie-law-info[^"\']*["\'][^>]*>\s*</script>#is', '', $html );
+
+    $html = preg_replace( '#<script\b[^>]*>\s*var\s+Cli_Data\s*=.*?</script>#is', '', $html );
+    $html = preg_replace( '#<script\b[^>]*>\s*var\s+cli_cookiebar_settings\s*=.*?</script>#is', '', $html );
+
+    return $html;
+}
+
+function digilens_native_form_markup( $type = 'contact' ) {
+    $sent = isset( $_GET['dl_sent'] ) ? sanitize_key( wp_unslash( $_GET['dl_sent'] ) ) : '';
+    $notice = '';
+    if ( $sent === $type ) { $notice = '<div class="digilens-form-notice">Cảm ơn bạn. Yêu cầu đã được gửi thành công.</div>'; }
+
+    $action = esc_url( admin_url( 'admin-post.php' ) );
+    $nonce = wp_nonce_field( 'digilens_' . $type, '_dl_nonce', true, false );
+    if ( $type === 'newsletter' ) {
+        return $notice . '<form class="digilens-native-form" method="post" action="' . $action . '">' . $nonce .
+            '<input type="hidden" name="action" value="digilens_newsletter">' .
+            '<label>Email<input type="email" name="email" required autocomplete="email"></label>' .
+            '<label class="dl-hp">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>' .
+            '<button type="submit">Đăng ký</button></form>';
+    }
+    return $notice . '<form class="digilens-native-form" method="post" action="' . $action . '">' . $nonce .
+        '<input type="hidden" name="action" value="digilens_contact">' .
+        '<div class="dl-row"><label>Họ và tên<input type="text" name="name" required autocomplete="name"></label><label>Email<input type="email" name="email" required autocomplete="email"></label></div>' .
+        '<div class="dl-row"><label>Công ty<input type="text" name="company" autocomplete="organization"></label><label>Số điện thoại<input type="tel" name="phone" autocomplete="tel"></label></div>' .
+        '<label>Nội dung<textarea name="message" required></textarea></label>' .
+        '<label class="dl-hp">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>' .
+        '<button type="submit">Gửi yêu cầu</button></form>';
+}
+
+function digilens_replace_hubspot_forms( $html ) {
+    $forms = array(
+        'c5265497-b30e-4bec-ab39-f832063f1401' => 'contact',
+        'c43fead5-e9a3-4760-a56b-8d8b68ba70c4' => 'newsletter',
+        'e6e8e8cc-c724-4c02-8710-12c785ae0892' => 'contact',
+    );
+    foreach ( $forms as $id => $type ) {
+        $pattern = '#<script>\s*window\.hsFormsOnReady.*?formId:\s*["\']' . preg_quote( $id, '#' ) . '["\'].*?</script>\s*<div class="hbspt-form"[^>]*></div>#is';
+        $html = preg_replace( $pattern, digilens_native_form_markup( $type ), $html );
+    }
+    return $html;
+}
+
 function digilens_fix_pagination( $html, $snapshot_rel ) {
-    // 1. Chuẩn hóa link phân trang tuyệt đối cho trang media và archives
     if ( preg_match( '#^media(?:/(\d+))?#i', $snapshot_rel ) ) {
         $html = preg_replace_callback( '#(<nav\b[^>]*class=["\'][^"\']*elementor-pagination[^"\']*["\'][^>]*>)(.*?)(</nav>)#is', function( $matches ) {
             $nav_open = $matches[1];
@@ -445,7 +416,6 @@ function digilens_fix_pagination( $html, $snapshot_rel ) {
         }, $html );
     }
 
-    // 2. Chèn script bắt sự kiện ở window capture phase để chuyển trang tức thì, vô hiệu hóa AJAX chặn click
     $script = '<script>
     (function() {
         window.addEventListener("click", function(e) {
@@ -472,9 +442,8 @@ function digilens_fix_pagination( $html, $snapshot_rel ) {
 
 function digilens_rewrite_snapshot_html( $html, $snapshot_rel ) {
     $html = digilens_strip_cookie_consent( $html );
-    $html = digilens_translate_header( $html );
+    $html = digilens_replace_entire_header( $html );
     $html = digilens_replace_entire_footer( $html );
-    $html = digilens_replace_main_content( $html, $snapshot_rel );
     $html = digilens_replace_hubspot_forms( $html );
     $html = digilens_fix_pagination( $html, $snapshot_rel );
 
@@ -532,10 +501,12 @@ function digilens_rewrite_snapshot_html( $html, $snapshot_rel ) {
 }
 
 function digilens_render_snapshot( $snapshot_rel ) {
-    $snapshot_rel = digilens_normalize_snapshot_path( $snapshot_rel );
-    $file = DIGILENS_SNAPSHOT_DIR . '/' . $snapshot_rel;
-    if ( ! is_file( $file ) ) { return; }
+    $file = DIGILENS_SNAPSHOT_DIR . '/' . digilens_normalize_snapshot_path( $snapshot_rel );
+    if ( ! is_file( $file ) ) {
+        status_header( 404 );
+        include get_template_directory() . '/404.php';
+        return;
+    }
     $html = file_get_contents( $file );
-    if ( $html === false ) { return; }
     echo digilens_rewrite_snapshot_html( $html, $snapshot_rel ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }

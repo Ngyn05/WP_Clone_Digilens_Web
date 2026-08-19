@@ -1,0 +1,127 @@
+/* DigiLens WP Admin Post Edit Screen Stylesheet */
+
+/* 1. Featured Image Box directly below Title */
+#dl-featured-image-after-title {
+    border: 1px solid #cbd5e1 !important;
+    border-top: 3px solid #00b0f0 !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    margin-top: 14px !important;
+    margin-bottom: 20px !important;
+}
+
+#dl-featured-image-after-title .postbox-header {
+    background: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 8px 14px !important;
+}
+
+#dl-featured-image-after-title .postbox-header h2 {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+}
+
+#dl_set_image_btn {
+    background: #00b0f0 !important;
+    border-color: #00b0f0 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    padding: 4px 16px !important;
+    height: 36px !important;
+    line-height: 28px !important;
+    box-shadow: 0 2px 4px rgba(0, 176, 240, 0.25) !important;
+}
+
+#dl_set_image_btn:hover {
+    background: #0098d4 !important;
+    border-color: #0098d4 !important;
+}
+
+#dl_delete_image_btn {
+    height: 36px !important;
+    line-height: 28px !important;
+    padding: 0 14px !important;
+    border-radius: 4px !important;
+    font-weight: 600 !important;
+}
+
+/* 2. Metadata Box below Editor */
+#digilens_post_settings_box {
+    border: 1px solid #cbd5e1 !important;
+    border-top: 4px solid #000a73 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+    background: #ffffff !important;
+    margin-top: 24px !important;
+}
+
+#digilens_post_settings_box .postbox-header {
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 12px 18px !important;
+    background: #f8fafc !important;
+    border-radius: 4px 4px 0 0 !important;
+}
+
+#digilens_post_settings_box .postbox-header h2 {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #000a73 !important;
+}
+
+.dl-admin-metabox-wrapper {
+    padding: 12px 6px !important;
+}
+
+.dl-admin-field-row {
+    margin-bottom: 22px !important;
+}
+
+.dl-admin-field-row:last-child {
+    margin-bottom: 0 !important;
+}
+
+.dl-admin-label {
+    display: block !important;
+    margin-bottom: 8px !important;
+    color: #1e293b !important;
+    font-size: 13.5px !important;
+}
+
+.dl-admin-label strong {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+}
+
+.dl-admin-desc {
+    display: block !important;
+    font-size: 12px !important;
+    color: #64748b !important;
+    font-weight: normal !important;
+    margin-top: 3px !important;
+    line-height: 1.4 !important;
+}
+
+.dl-admin-input,
+.dl-admin-textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    color: #1e293b !important;
+    background: #ffffff !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+}
+
+.dl-admin-input:focus,
+.dl-admin-textarea:focus {
+    border-color: #00b0f0 !important;
+    box-shadow: 0 0 0 3px rgba(0, 176, 240, 0.18) !important;
+    outline: none !important;
+}

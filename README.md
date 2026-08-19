@@ -1,20 +1,25 @@
-# DigiLens WordPress Theme (Việt hóa toàn diện v1.2.6)
+# DigiLens WordPress Theme (Việt hóa toàn diện v1.2.7 - Dynamic Database & Categories)
 
-WordPress theme được chuyển đổi từ snapshot DigiLens và Việt hóa 100% trực tiếp trong source code.
+WordPress theme được chuyển đổi từ snapshot DigiLens, Việt hóa 100% và hỗ trợ quản lý bài viết động từ WordPress Database.
 
-## Đã hoàn thành (v1.2.6)
+## Đã hoàn thành (v1.2.7)
+- **Quản lý & Render bài viết 100% từ WordPress Database**:
+  + Toàn bộ 41+ bài viết chi tiết được trích xuất nội dung HTML sạch, lưu trữ đầy đủ vào WordPress database (`wp_posts`, `wp_term_relationships`, `wp_postmeta`).
+  + Người dùng có thể dễ dàng quản lý, chỉnh sửa tiêu đề, viết thêm bài mới, cập nhật nội dung trong giao diện quản trị WordPress (Classic Editor / Gutenberg), giao diện ngoài trang web sẽ cập nhật ngay lập tức.
+- **Phân loại chính xác 5 chuyên mục WordPress (Categories)**:
+  + **Thông cáo báo chí** (`press-release`)
+  + **Blog** (`blogs`)
+  + **Góc nhìn chuyên sâu** (`thought-pieces`)
+  + **Tin tức** (`news`)
+  + **Truyền thông** (`media`)
+- **Template động chuyên nghiệp**:
+  + [single.php](file:///c:/Users/hnguy/Local%20Sites/digilens-vn/app/public/wp-content/themes/digilens-theme/single.php): Giao diện bài viết chi tiết chuẩn DigiLens (Breadcrumbs, Category badge, Title, Date, Featured Hero Image, Article Content, Tags, Bài viết trước/sau).
+  + [category.php](file:///c:/Users/hnguy/Local%20Sites/digilens-vn/app/public/wp-content/themes/digilens-theme/category.php) & [archive.php](file:///c:/Users/hnguy/Local%20Sites/digilens-vn/app/public/wp-content/themes/digilens-theme/archive.php): Giao diện danh mục dạng Grid Cards động với phân trang `paginate_links()`.
+- **Đồng bộ CSS cho trình soạn thảo Classic Editor**:
+  + Thêm file [assets/css/editor-style.css](file:///c:/Users/hnguy/Local%20Sites/digilens-vn/app/public/wp-content/themes/digilens-theme/assets/css/editor-style.css) giúp định dạng font chữ, màu sắc, tiêu đề, blockquote trong khung soạn thảo TinyMCE giống hệt giao diện ngoài thực tế.
+- **Đồng bộ 100% Header & Navigation tiếng Việt**: Toàn bộ menu Desktop và Mobile drawer đều hiển thị tiếng Việt trên tất cả các trang.
 - **Việt hóa 100% toàn bộ 19 WordPress Pages chính**: Trang chủ (Homepage), ARGO, Partners, Media, Privacy Policy, Optics, Careers, Company, Contact, ARGO Next, Website Terms, Waveguides, ARGO Terms...
-- **Việt hóa 100% toàn bộ 41 bài viết chi tiết (Single Posts / Press Releases / Thought Pieces)**: Tiêu đề, phụ đề, nội dung chi tiết bài viết, ngày tháng, thông tin tác giả, nút tải tài liệu PDF, khối giới thiệu công ty và liên hệ truyền thông.
-- **Việt hóa 100% toàn bộ 15 trang lưu trữ tác giả & 20 trang lưu trữ chuyên mục**: Toàn bộ tiêu đề bài viết truyền thông/video bên ngoài (CNET, YouTube, Forbes, VentureBeat, Auganix, Mixed-News, Embedded.com, The AR Show, AWE...), thẻ meta Yoast SEO, breadcrumb, tiêu đề danh mục/tác giả, phân trang (`« Trước`, `Tiếp »`, `Trang X / Y`), nút `Đọc thêm »`, và ngày tháng tiếng Việt.
-- **Tự động đồng bộ WordPress Database (v1.2.6)**: Cập nhật hàm `snapshot-importer.php` tự động đồng bộ cả Pages và Posts với tiêu đề & nội dung tiếng Việt vào cơ sở dữ liệu WordPress khi import/resync.
-- **Khắc phục triệt để lỗi phân trang (Pagination Move Page)**: Cho phép chuyển trang mượt mà giữa các trang tin tức `1, 2, 3, 4, 5, 6, 7`, « Trước, Tiếp » mà không bị AJAX của Elementor chặn lại.
-- **Master Footer DigiLens Việt Nam cao cấp**:
-  + Logo DigiLens + Badge Việt Nam màu Cyan (`#00B0F0`).
-  + 3 Card hỗ trợ khách hàng chuyên nghiệp (Hà Nội, TP.HCM, Hotline 24/7 `1900.63.8400`).
-  + 3 Cột menu chính (CÔNG NGHỆ, GIỚI THIỆU, PHÁP LÝ) căn giữa sang trọng trên Desktop, tự động chuyển thành Accordion dạng sổ trên Mobile.
-  + Khoảng cách lề (spacing) và đường viền phát sáng nhẹ tách biệt hoàn hảo với nội dung phía trên.
-- **Loại bỏ hoàn toàn cookie consent và banner thừa**.
-- **Việt hóa form liên hệ / nhận tin tức**.
+- **Master Footer DigiLens Việt Nam cao cấp**: 3 Card hỗ trợ khách hàng, 3 cột menu căn giữa sang trọng trên Desktop, tự động chuyển thành Accordion dạng sổ trên Mobile.
 
 ## Cài đặt & Sử dụng
 1. Upload thư mục theme vào `wp-content/themes/digilens-theme`.

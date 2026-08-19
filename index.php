@@ -1,6 +1,11 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
+if ( is_single() || is_singular( 'post' ) ) {
+    get_template_part( 'single' );
+    return;
+}
+
 $snapshot = digilens_snapshot_for_current_request();
 if ( $snapshot ) {
     if ( is_404() ) { status_header( 200 ); }
