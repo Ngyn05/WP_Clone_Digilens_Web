@@ -400,6 +400,9 @@ function digilens_replace_entire_footer( $html ) {
         return preg_replace( $fallback_pattern, $new_footer, $html, 1 );
     }
 
+    return $html;
+}
+
 function digilens_fix_pagination( $html, $snapshot_rel ) {
     // 1. Chuẩn hóa link phân trang tuyệt đối cho trang media và archives
     if ( preg_match( '#^media(?:/(\d+))?#i', $snapshot_rel ) ) {
