@@ -17,6 +17,7 @@ function digilens_render_master_header() {
     $argo_url       = esc_url( home_url( '/argo/' ) );
     $waveguides_url = esc_url( home_url( '/waveguides/' ) );
     $partners_url   = esc_url( home_url( '/partners/' ) );
+    $store_url      = esc_url( home_url( '/store/' ) );
     $company_url    = esc_url( home_url( '/company/' ) );
     $media_url      = esc_url( home_url( '/media/' ) );
     $careers_url    = esc_url( home_url( '/careers/' ) );
@@ -57,6 +58,11 @@ function digilens_render_master_header() {
                             <!-- Menu Item: Đối tác -->
                             <li class="dl-nav-item" id="menu-item-partners">
                                 <a href="' . $partners_url . '" class="dl-nav-link">ĐỐI TÁC</a>
+                            </li>
+
+                            <!-- Menu Item: Cửa hàng -->
+                            <li class="dl-nav-item" id="menu-item-store">
+                                <a href="' . $store_url . '" class="dl-nav-link dl-nav-store">CỬA HÀNG</a>
                             </li>
 
                             <!-- Menu Item: Giới thiệu -->
@@ -109,6 +115,7 @@ function digilens_render_master_header() {
                     <li><a href="https://developer.digilens.com/" target="_blank" rel="noopener">Cổng thông tin nhà phát triển</a></li>
                     <li><a href="' . $waveguides_url . '">Ống dẫn sóng</a></li>
                     <li><a href="' . $partners_url . '">Đối tác</a></li>
+                    <li><a href="' . $store_url . '">CỬA HÀNG</a></li>
                     <li><a href="' . $company_url . '">Công ty</a></li>
                     <li><a href="' . $media_url . '">Trung tâm truyền thông</a></li>
                     <li><a href="' . $careers_url . '">Tuyển dụng</a></li>

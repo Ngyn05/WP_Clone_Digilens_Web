@@ -743,12 +743,87 @@ function digilens_inject_dynamic_media_widgets( $html ) {
     return $html;
 }
 
+/**
+ * Automatically inject iframe players for all Elementor video widgets (YouTube, Vimeo, etc.)
+ */
+function digilens_inject_embedded_videos( $html ) {
+    return preg_replace_callback(
+        '#<div\b([^>]*\bclass=["\'][^"\']*elementor-widget-video[^"\']*["\'][^>]*data-settings=(["\'])(.*?)\2[^>]*)>([\s\S]*?)</div>\s*</div>\s*</div>#i',
+        function( $matches ) {
+            $widget_open = $matches[1];
+            $raw_settings = html_entity_decode( $matches[3], ENT_QUOTES, 'UTF-8' );
+            $inner_content = $matches[4];
+
+            $settings = json_decode( $raw_settings, true );
+            if ( ! is_array( $settings ) ) {
+                return $matches[0];
+            }
+
+            $youtube_url = isset( $settings['youtube_url'] ) ? trim( $settings['youtube_url'] ) : '';
+            $vimeo_url   = isset( $settings['vimeo_url'] ) ? trim( $settings['vimeo_url'] ) : '';
+
+            $player_html = '';
+
+            if ( ! empty( $youtube_url ) ) {
+                if ( preg_match( '#(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})#i', $youtube_url, $ym ) ) {
+                    $vid_id   = $ym[1];
+                    $autoplay = ! empty( $settings['autoplay'] ) && $settings['autoplay'] === 'yes' ? 1 : 0;
+                    $loop     = ! empty( $settings['loop'] ) && $settings['loop'] === 'yes' ? 1 : 0;
+                    $controls = ! isset( $settings['controls'] ) || $settings['controls'] === 'yes' ? 1 : 0;
+
+                    $query_params = array(
+                        'controls'       => $controls,
+                        'rel'            => 0,
+                        'playsinline'    => 1,
+                        'modestbranding' => 1,
+                        'enablejsapi'    => 1,
+                    );
+                    if ( $autoplay ) {
+                        $query_params['autoplay'] = 1;
+                        $query_params['mute']     = 1;
+                    }
+                    if ( $loop ) {
+                        $query_params['loop']     = 1;
+                        $query_params['playlist'] = $vid_id;
+                    }
+
+                    $embed_src = 'https://www.youtube-nocookie.com/embed/' . $vid_id . '?' . http_build_query( $query_params );
+
+                    $player_html = '<iframe class="elementor-video-iframe" src="' . esc_url( $embed_src ) . '" title="DigiLens Video Player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="width:100%;height:100%;aspect-ratio:16/9;border:none;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);"></iframe>';
+                }
+            } elseif ( ! empty( $vimeo_url ) ) {
+                if ( preg_match( '#vimeo\.com\/(?:video\/)?(\d+)#i', $vimeo_url, $vm ) ) {
+                    $vimeo_id = $vm[1];
+                    $embed_src = 'https://player.vimeo.com/video/' . $vimeo_id . '?title=0&byline=0&portrait=0';
+                    $player_html = '<iframe class="elementor-video-iframe" src="' . esc_url( $embed_src ) . '" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="width:100%;height:100%;aspect-ratio:16/9;border:none;border-radius:12px;"></iframe>';
+                }
+            }
+
+            if ( ! empty( $player_html ) ) {
+                if ( preg_match( '#<div\b[^>]*\bclass=["\'][^"\']*elementor-video[^"\']*["\'][^>]*>[\s]*</div>#i', $inner_content ) ) {
+                    $inner_content = preg_replace(
+                        '#<div\b([^>]*\bclass=["\'][^"\']*elementor-video[^"\']*["\'][^>]*)>[\s]*</div>#i',
+                        '<div $1>' . $player_html . '</div>',
+                        $inner_content
+                    );
+                } else {
+                    $inner_content .= '<div class="elementor-video" style="aspect-ratio:16/9;width:100%;">' . $player_html . '</div>';
+                }
+            }
+
+            return '<div ' . $widget_open . '>' . $inner_content . '</div></div></div>';
+        },
+        $html
+    );
+}
+
 function digilens_rewrite_snapshot_html( $html, $snapshot_rel ) {
     $html = digilens_strip_cookie_consent( $html );
     $html = digilens_replace_entire_header( $html );
     $html = digilens_replace_entire_footer( $html );
     $html = digilens_inject_dynamic_media_widgets( $html );
     $html = digilens_replace_hubspot_forms( $html );
+    $html = digilens_inject_embedded_videos( $html );
     $html = digilens_fix_pagination( $html, $snapshot_rel );
 
     // 0. Strip broken speculation rules and emoji scripts from snapshot

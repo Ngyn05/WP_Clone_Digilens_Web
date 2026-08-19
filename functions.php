@@ -12,6 +12,7 @@ require_once DIGILENS_THEME_DIR . '/inc/snapshot-importer.php';
 require_once DIGILENS_THEME_DIR . '/inc/forms.php';
 require_once DIGILENS_THEME_DIR . '/inc/header-nav.php';
 require_once DIGILENS_THEME_DIR . '/inc/post-metaboxes.php';
+require_once DIGILENS_THEME_DIR . '/inc/products.php';
 
 add_action( 'after_setup_theme', function () {
     add_theme_support( 'title-tag' );
@@ -144,6 +145,13 @@ add_action( 'template_redirect', function () {
         exit;
     }
 
+    // Store Page Route: /store/, /cua-hang/, /shop/
+    if ( $uri === 'store' || $uri === 'cua-hang' || $uri === 'shop' || is_page( 'store' ) ) {
+        status_header( 200 );
+        include DIGILENS_THEME_DIR . '/page-store.php';
+        exit;
+    }
+
     // Dynamic WordPress rendering: Let single posts, author, and search run through WordPress templates
     if ( is_single() || is_singular( 'post' ) || is_home() || is_archive() || is_search() ) {
         return;
@@ -161,6 +169,19 @@ add_action( 'template_redirect', function () {
         exit;
     }
 }, 1 );
+
+// Ensure 'store' page exists in database
+add_action( 'init', function () {
+    if ( ! get_page_by_path( 'store' ) ) {
+        wp_insert_post( array(
+            'post_title'     => 'Cửa hàng (Store)',
+            'post_name'      => 'store',
+            'post_status'    => 'publish',
+            'post_type'      => 'page',
+            'comment_status' => 'closed',
+        ) );
+    }
+} );
 
 add_filter( 'redirect_canonical', function ( $redirect_url ) {
     return digilens_snapshot_for_current_request() ? false : $redirect_url;

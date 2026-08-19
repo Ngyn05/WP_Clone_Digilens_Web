@@ -78,11 +78,223 @@ a,
     z-index: -9999 !important;
 }
 
-/* Khoảng đệm cho nội dung trang trước Footer */
+/* Loại bỏ khoảng trắng thừa trước Footer */
 #content,
 .site-content,
-.entry-content {
-    margin-bottom: 40px !important;
+.entry-content,
+#primary,
+#main,
+.ast-container,
+.ast-plain-container,
+article.page,
+.elementor-page {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Ẩn các container rỗng gây giãn khoảng cách */
+.elementor-element-e40e3e7,
+.elementor-element-807afbd,
+.e-con:empty,
+.e-con-inner:empty,
+.elementor-element:empty {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.elementor-element-59029f8 {
+    margin-bottom: 0 !important;
+}
+
+.digilens-master-footer {
+    margin-top: 0 !important;
+}
+
+/* ==========================================================================
+   GLOBAL FULL-WIDTH & FLUID PAGE LAYOUT (Dãn đều 2 bên toàn trang)
+   ========================================================================== */
+html,
+body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+}
+
+#page,
+.site,
+.site-content,
+#content,
+.ast-container,
+.ast-plain-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Elementor Section Fluid Expansion */
+.elementor-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.elementor-section.elementor-section-stretched {
+    width: 100% !important;
+    max-width: 100% !important;
+    left: 0 !important;
+}
+
+.elementor-section.elementor-section-boxed > .elementor-container {
+    max-width: 1440px !important;
+    width: 100% !important;
+    padding-left: 40px !important;
+    padding-right: 40px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+}
+
+@media (min-width: 1600px) {
+    .elementor-section.elementor-section-boxed > .elementor-container {
+        max-width: 1600px !important;
+        padding-left: 56px !important;
+        padding-right: 56px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .elementor-section.elementor-section-boxed > .elementor-container {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+    }
+}
+
+/* Hero Section on /argo/ specifically - full breathing space & edge stretch */
+.elementor-element-50a13e07 {
+    background-size: cover !important;
+    background-position: right center !important;
+    background-repeat: no-repeat !important;
+    width: 100% !important;
+}
+
+.elementor-element-50a13e07 > .elementor-container {
+    max-width: 100% !important;
+    padding: 60px 48px !important;
+}
+
+/* Responsive Video Embeds (YouTube / Vimeo / HTML5 Video) */
+.elementor-widget-video .elementor-wrapper {
+    position: relative !important;
+    width: 100% !important;
+    aspect-ratio: 16 / 9 !important;
+    background: #000000 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.elementor-widget-video .elementor-video,
+.elementor-widget-video iframe,
+.elementor-widget-video video {
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: 16 / 9 !important;
+    border: none !important;
+    border-radius: 12px !important;
+    display: block !important;
+}
+
+/* Căn giữa gọn gàng khối Video & Giới thiệu "Bạn nên trải nghiệm điều này" */
+.elementor-element-230782ac {
+    padding: 70px 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.elementor-element-230782ac > .elementor-container {
+    max-width: 1240px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 48px !important;
+    box-sizing: border-box !important;
+}
+
+.elementor-element-230782ac .elementor-element-3777ba5e {
+    width: 52% !important;
+    flex: 1.1 !important;
+}
+
+.elementor-element-230782ac .elementor-element-6acbc2b7 {
+    width: 48% !important;
+    flex: 0.9 !important;
+}
+
+@media (max-width: 991px) {
+    .elementor-element-230782ac {
+        padding: 40px 0 !important;
+    }
+    .elementor-element-230782ac > .elementor-container {
+        flex-direction: column !important;
+        gap: 32px !important;
+        padding: 0 20px !important;
+    }
+    .elementor-element-230782ac .elementor-element-3777ba5e,
+    .elementor-element-230782ac .elementor-element-6acbc2b7 {
+        width: 100% !important;
+    }
+}
+
+/* Bỏ form và căn giữa tiêu đề "Công nghệ AR thế hệ mới bắt đầu từ đây" */
+.elementor-element-48e768d4 .elementor-element-6e5d3744,
+.elementor-element-48e768d4 .elementor-widget-hubspot-form {
+    display: none !important;
+}
+
+.elementor-element-48e768d4 {
+    padding: 90px 20px !important;
+    text-align: center !important;
+}
+
+.elementor-element-48e768d4 > .elementor-container {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    max-width: 900px !important;
+    margin: 0 auto !important;
+}
+
+.elementor-element-48e768d4 .elementor-element-357dc7a9 {
+    width: 100% !important;
+    max-width: 850px !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+}
+
+.elementor-element-48e768d4 .elementor-widget-heading {
+    text-align: center !important;
+    width: 100% !important;
+}
+
+.elementor-element-48e768d4 .elementor-heading-title {
+    text-align: center !important;
+    font-size: 40px !important;
+    line-height: 1.35 !important;
+    color: #0b132b !important;
+    margin: 0 auto !important;
+    font-weight: 700 !important;
 }
 
 /* ==========================================================================
@@ -99,10 +311,23 @@ a,
 }
 
 .dl-header-container {
-    max-width: 1240px !important;
+    width: 100% !important;
+    max-width: 1360px !important;
     margin: 0 auto !important;
-    padding: 0 24px !important;
+    padding: 0 40px !important;
     box-sizing: border-box !important;
+}
+
+@media (max-width: 1200px) {
+    .dl-header-container {
+        padding: 0 24px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .dl-header-container {
+        padding: 0 16px !important;
+    }
 }
 
 .dl-header-row {
@@ -182,7 +407,7 @@ a,
     position: absolute !important;
     top: 100% !important;
     left: 0 !important;
-    min-width: 240px !important;
+    min-width: 250px !important;
     background: #0b1120 !important;
     border: 1px solid #1e293b !important;
     border-radius: 8px !important;
@@ -191,6 +416,14 @@ a,
     list-style: none !important;
     margin: 0 !important;
     z-index: 99999 !important;
+    white-space: nowrap !important;
+}
+
+/* Căn sang phải cho dropdown GIỚI THIỆU để không bao giờ bị tràn ra mép màn hình */
+#menu-item-about .dl-dropdown-menu,
+.dl-nav-item:last-child .dl-dropdown-menu {
+    left: auto !important;
+    right: 0 !important;
 }
 
 .dl-has-dropdown:hover > .dl-dropdown-menu {
@@ -205,20 +438,21 @@ a,
 
 .dl-dropdown-menu a {
     display: block !important;
-    padding: 10px 20px !important;
+    padding: 12px 24px !important;
     color: #cbd5e1 !important;
-    font-size: 0.9rem !important;
+    font-size: 0.92rem !important;
     font-weight: 600 !important;
     text-decoration: none !important;
     text-transform: none !important;
     letter-spacing: normal !important;
+    white-space: nowrap !important;
     transition: all 0.2s ease !important;
 }
 
 .dl-dropdown-menu a:hover {
     background: #00b0f0 !important;
     color: #ffffff !important;
-    padding-left: 24px !important;
+    padding-left: 28px !important;
 }
 
 /* Header Responsive Visibility */
@@ -330,12 +564,12 @@ a,
     background-color: #121214 !important;
     color: #8b949e !important;
     width: 100% !important;
-    margin-top: 80px !important;
-    padding: 70px 0 45px 0 !important;
+    margin-top: 0 !important;
+    padding: 60px 0 45px 0 !important;
     box-sizing: border-box !important;
     position: relative !important;
-    border-top: 1px solid rgba(0, 176, 240, 0.3) !important;
-    box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.6) !important;
+    border-top: 1px solid #222228 !important;
+    box-shadow: none !important;
     clear: both !important;
     display: block !important;
 }
