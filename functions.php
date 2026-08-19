@@ -40,6 +40,22 @@ add_action( 'wp_head', function () {
     echo '<meta name="msapplication-TileImage" content="' . esc_url( $icon_apple ) . '" />' . "\n";
 }, 1 );
 
+// Prevent 403 / CORS on REST nonce checks and user preferences in frontend
+add_action( 'wp_ajax_nopriv_rest-nonce', function () {
+    wp_send_json( wp_create_nonce( 'wp_rest' ) );
+} );
+add_action( 'wp_ajax_rest-nonce', function () {
+    wp_send_json( wp_create_nonce( 'wp_rest' ) );
+} );
+
+// Prevent 403 on /wp-json/wp/v2/users/me for non-logged in visitors on frontend snapshots
+add_filter( 'rest_request_before_callbacks', function( $response, $handler, $request ) {
+    if ( is_a( $request, 'WP_REST_Request' ) && strpos( $request->get_route(), '/wp/v2/users/me' ) !== false && ! is_user_logged_in() ) {
+        return new WP_REST_Response( array( 'id' => 0, 'name' => 'Guest', 'capabilities' => array() ), 200 );
+    }
+    return $response;
+}, 10, 3 );
+
 // Enqueue styles for Classic Editor (TinyMCE)
 add_filter( 'mce_css', function ( $mce_css ) {
     $editor_style = get_template_directory_uri() . '/assets/css/editor-style.css';

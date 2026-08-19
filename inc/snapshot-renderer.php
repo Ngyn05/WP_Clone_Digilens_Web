@@ -447,12 +447,40 @@ function digilens_rewrite_snapshot_html( $html, $snapshot_rel ) {
     $html = digilens_replace_hubspot_forms( $html );
     $html = digilens_fix_pagination( $html, $snapshot_rel );
 
-    // Exact original-domain asset roots inside JS/CSS strings.
+    // 1. Rewrite AJAX & REST endpoints from remote domain to local WordPress
+    $local_ajax = admin_url( 'admin-ajax.php' );
+    $local_ajax_esc = str_replace( '/', '\\/', $local_ajax );
+    $local_rest = rest_url();
+    $local_rest_esc = str_replace( '/', '\\/', $local_rest );
+
+    $domain_replacements = array(
+        'https://www.digilens.com/wp-admin/admin-ajax.php'     => $local_ajax,
+        'http://www.digilens.com/wp-admin/admin-ajax.php'      => $local_ajax,
+        'https://digilens.com/wp-admin/admin-ajax.php'          => $local_ajax,
+        'https:\/\/www.digilens.com\/wp-admin\/admin-ajax.php' => $local_ajax_esc,
+        'http:\/\/www.digilens.com\/wp-admin\/admin-ajax.php'  => $local_ajax_esc,
+        'https:\/\/digilens.com\/wp-admin\/admin-ajax.php'     => $local_ajax_esc,
+
+        'https://www.digilens.com/wp-json/'                    => $local_rest,
+        'http://www.digilens.com/wp-json/'                     => $local_rest,
+        'https://digilens.com/wp-json/'                         => $local_rest,
+        'https:\/\/www.digilens.com\/wp-json\/'                => $local_rest_esc,
+        'http:\/\/www.digilens.com\/wp-json\/'                 => $local_rest_esc,
+        'https:\/\/digilens.com\/wp-json\/'                    => $local_rest_esc,
+    );
+    $html = str_replace( array_keys( $domain_replacements ), array_values( $domain_replacements ), $html );
+
+    // 2. Exact original-domain asset roots inside JS/CSS strings.
     $asset_roots = array( 'wp-content/', 'wp-includes/', 'forms/', 'gtag/', '@googlemaps/', 's/', 'af/', 'count/' );
     foreach ( $asset_roots as $root ) {
         $html = str_replace(
             array( 'https://www.digilens.com/' . $root, 'http://www.digilens.com/' . $root, 'https://digilens.com/' . $root ),
             trailingslashit( DIGILENS_SNAPSHOT_URI ) . $root,
+            $html
+        );
+        $html = str_replace(
+            array( 'https:\/\/www.digilens.com\/' . str_replace('/', '\\/', $root), 'http:\/\/www.digilens.com\/' . str_replace('/', '\\/', $root) ),
+            str_replace('/', '\\/', trailingslashit( DIGILENS_SNAPSHOT_URI ) . $root),
             $html
         );
     }
