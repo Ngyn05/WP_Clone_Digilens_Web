@@ -352,6 +352,8 @@ function digilens_strip_cookie_consent( $html ) {
 
     $html = preg_replace( '#<script\b[^>]*>\s*var\s+Cli_Data\s*=.*?</script>#is', '', $html );
     $html = preg_replace( '#<script\b[^>]*>\s*var\s+cli_cookiebar_settings\s*=.*?</script>#is', '', $html );
+    $html = preg_replace( '#<script\b[^>]*type=["\']speculationrules["\'][^>]*>[\s\S]*?</script>#is', '', $html );
+    $html = preg_replace( '#<script\b[^>]*>\s*window\._wpemojiSettings[\s\S]*?</script>#is', '', $html );
 
     return $html;
 }
@@ -393,29 +395,6 @@ function digilens_replace_hubspot_forms( $html ) {
 }
 
 function digilens_fix_pagination( $html, $snapshot_rel ) {
-    if ( preg_match( '#^media(?:/(\d+))?#i', $snapshot_rel ) ) {
-        $html = preg_replace_callback( '#(<nav\b[^>]*class=["\'][^"\']*elementor-pagination[^"\']*["\'][^>]*>)(.*?)(</nav>)#is', function( $matches ) {
-            $nav_open = $matches[1];
-            $nav_body = $matches[2];
-            $nav_close = $matches[3];
-
-            $nav_body = preg_replace_callback( '#href=["\']([^"\']+)["\']#i', function( $hm ) {
-                $raw_href = $hm[1];
-                if ( preg_match( '#(?:\.\./)?(\d+)(?:/index\.htm|/)?$#i', $raw_href, $pm ) ) {
-                    $page_num = (int) $pm[1];
-                    $target = ( $page_num === 1 ) ? home_url( '/media/' ) : home_url( '/media/' . $page_num . '/' );
-                    return 'href="' . esc_url( $target ) . '"';
-                }
-                if ( preg_match( '#(?:\.\./)?index\.htm$#i', $raw_href ) || $raw_href === '../' ) {
-                    return 'href="' . esc_url( home_url( '/media/' ) ) . '"';
-                }
-                return $hm[0];
-            }, $nav_body );
-
-            return $nav_open . $nav_body . $nav_close;
-        }, $html );
-    }
-
     $script = '<script>
     (function() {
         window.addEventListener("click", function(e) {
@@ -423,7 +402,7 @@ function digilens_fix_pagination( $html, $snapshot_rel ) {
             if (link) {
                 var href = link.getAttribute("href");
                 if (href && href !== "#" && !href.startsWith("javascript:")) {
-                    e.preventDefault();
+e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     window.location.href = href;
@@ -440,12 +419,369 @@ function digilens_fix_pagination( $html, $snapshot_rel ) {
     return $html;
 }
 
+function digilens_get_card_thumbnail( $post_id, $title = '' ) {
+    // Verified pools of real images physically existing on disk
+    $pool_pr = array(
+        'wp-content/uploads/2025/10/PR-Next-Altoura-Frontline-01-300x157.png',
+        'wp-content/uploads/2025/09/PR-Kognitiv-Spark-RemoteSpark-300x157.png',
+        'wp-content/uploads/2025/06/PR_DG_TAQ_SOC-300x157.jpg',
+        'wp-content/uploads/2025/05/PR-DGL_RMBR_postimage-300x157.jpg',
+        'wp-content/uploads/2024/09/DL-Avegant-PR-graphic-090424-01.png',
+        'wp-content/uploads/2024/09/2024-AUG-HL-NVIDIA-HL-Image-03-1800px.png',
+        'wp-content/uploads/2024/07/taqtile-announces-manifest-for-argo.png',
+        'wp-content/uploads/2023/05/Tactile-PR-Social-Image.png',
+        'wp-content/uploads/2023/05/Mojo-DL-Announcement-e1685481564178-1024x678.png',
+        'wp-content/uploads/2021/05/about-dv1-separated-768x597.jpg',
+        'wp-content/uploads/2020/05/designv1-exploded-768x397.jpg',
+        'wp-content/uploads/2023/08/DL-Argo-080923-01.jpg',
+    );
+
+    $pool_blog = array(
+        'wp-content/uploads/2023/08/DL-Argo-080923-01.jpg',
+        'wp-content/uploads/2022/07/Thought-Piece-01.png',
+        'wp-content/uploads/2022/07/Throught-Piece-02.png',
+        'wp-content/uploads/2022/07/Thought-Piece-03.png',
+        'wp-content/uploads/2022/07/Thought-Piece-04.png',
+        'wp-content/uploads/2021/05/dv1-smartglasses-hero-v3-1024x559.jpg',
+        'wp-content/uploads/2023/04/DL-SRG-Social-1919-x-886-031023-01.png',
+        'wp-content/uploads/2023/05/DL-Spaces-1200x1200-051523-03.png',
+        'wp-content/uploads/2024/07/taqtile-announces-manifest-for-argo.png',
+        'wp-content/uploads/2023/03/DL-Industry-Social-031623-1919-x-886.png',
+    );
+
+    $pool_media = array(
+        'wp-content/uploads/2025/03/gsw-trinet-digilens-1024x533.png',
+        'wp-content/uploads/2023/05/Mojo-DL-Announcement-e1685481564178-1024x678.png',
+        'wp-content/uploads/2023/05/Tactile-PR-Social-Image.png',
+        'wp-content/uploads/2023/05/wisear-graphic-1024x707.jpeg',
+        'wp-content/uploads/2023/03/DL-Industry-Social-031623-1919-x-886.png',
+        'wp-content/uploads/2023/08/DL-Argo-080923-01.jpg',
+    );
+
+    $pool_news = array(
+        'wp-content/uploads/2023/01/forbes-2-logo-png-transparent-300x116.png',
+        'wp-content/uploads/2023/01/forbes-2-logo-png-transparent-1024x397.png',
+    );
+
+    // 1. Check custom database meta or WordPress featured image
+    $thumb_id = get_post_thumbnail_id( $post_id );
+    if ( $thumb_id ) {
+        $url = wp_get_attachment_image_url( $thumb_id, 'medium_large' );
+        if ( $url ) { return $url; }
+    }
+
+    $meta_img = get_post_meta( $post_id, '_digilens_featured_image_url', true );
+    if ( $meta_img && strpos( $meta_img, 'http' ) === 0 && strpos( $meta_img, 'staging.digilens' ) === false ) {
+        return $meta_img;
+    }
+
+    // 2. Extract first image from post content if it exists locally on disk
+    $content = get_post_field( 'post_content', $post_id );
+    if ( $content && preg_match( '#<img[^>]+src=["\']([^"\']+)["\']#i', $content, $cm ) ) {
+        $csrc = trim( $cm[1] );
+        if ( ! preg_match( '#(?:icon|spacer|emoji|blank|staging\.digilens)#i', $csrc ) ) {
+            $rel = ltrim( str_replace( array( home_url(), 'http://digilens-vn.local', 'https://www.digilens.com', 'http://www.digilens.com', '../', 'wp-content/themes/digilens-theme/snapshot/' ), '', $csrc ), '/' );
+            if ( is_file( DIGILENS_SNAPSHOT_DIR . '/' . $rel ) ) {
+                return trailingslashit( DIGILENS_SNAPSHOT_URI ) . $rel;
+            }
+        }
+    }
+
+    // 3. Match unique image by post slug if it exists on disk
+    $slug = get_post_field( 'post_name', $post_id );
+    $known_slug_images = array(
+        'eradex-argospower-fow'                              => 'wp-content/uploads/2023/08/DL-Argo-080923-01.jpg',
+        'eradex-results'                                     => 'wp-content/uploads/2022/07/Thought-Piece-01.png',
+        'evaluating-the-impact-of-ar-on-manufacturing-training' => 'wp-content/uploads/2022/07/Throught-Piece-02.png',
+        'evaluating-ar-impact-on-manufacturing-training'     => 'wp-content/uploads/2022/07/Throught-Piece-02.png',
+        'niche-to-necessity-market-readiness'                => 'wp-content/uploads/2022/07/Thought-Piece-03.png',
+        'ar-niche-to-necessary'                              => 'wp-content/uploads/2022/07/Thought-Piece-03.png',
+        'work-first-play-later'                              => 'wp-content/uploads/2023/03/DL-Industry-Social-031623-1919-x-886.png',
+        'visualizing-the-future-of-head-worn'                => 'wp-content/uploads/2021/05/dv1-smartglasses-hero-v3-1024x559.jpg',
+        'xr-will-be-next-big-thing'                          => 'wp-content/uploads/2022/07/Thought-Piece-04.png',
+        'xr-will-shape-the-future-of-work'                   => 'wp-content/uploads/2023/04/DL-SRG-Social-1919-x-886-031023-01.png',
+        'building-sota-headworn-company'                     => 'wp-content/uploads/2021/05/about-dv1-separated-768x597.jpg',
+        'digilens-is-making-strides-in-extending-reality-and-augmenting-life-in-2022' => 'wp-content/uploads/2023/05/DL-Spaces-1200x1200-051523-03.png',
+        'pr-argo-next'                                       => 'wp-content/uploads/2025/10/PR-Next-Altoura-Frontline-01-300x157.png',
+        'pr-remotespark'                                     => 'wp-content/uploads/2025/09/PR-Kognitiv-Spark-RemoteSpark-300x157.png',
+        'pr-digisaastaq'                                     => 'wp-content/uploads/2025/06/PR_DG_TAQ_SOC-300x157.jpg',
+        'pr-dglxramblr-2'                                    => 'wp-content/uploads/2025/05/PR-DGL_RMBR_postimage-300x157.jpg',
+        'pr-avegantc304th'                                   => 'wp-content/uploads/2024/09/DL-Avegant-PR-graphic-090424-01.png',
+        'pr-googlecloud0624'                                 => 'wp-content/uploads/2024/09/2024-AUG-HL-NVIDIA-HL-Image-03-1800px.png',
+        'pr-cotupgrade'                                      => 'wp-content/uploads/2024/07/taqtile-announces-manifest-for-argo.png',
+        'pr-msftintune'                                      => 'wp-content/uploads/2023/08/DL-Argo-080923-01.jpg',
+        'pr-kaynestech'                                      => 'wp-content/uploads/2020/05/designv1-exploded-768x397.jpg',
+        'pr-argo-snapdragon-spaces'                          => 'wp-content/uploads/2023/05/Mojo-DL-Announcement-e1685481564178-1024x678.png',
+        'taqtile-digilens'                                   => 'wp-content/uploads/2023/05/Tactile-PR-Social-Image.png',
+        'wisear-announce-partnership'                        => 'wp-content/uploads/2023/05/wisear-graphic-1024x707.jpeg',
+        'mojovision-partnership'                             => 'wp-content/uploads/2023/05/Mojo-DL-Announcement-e1685481564178-1024x678.png',
+        'digilens-inc-introduces-argo-2'                     => 'wp-content/uploads/2023/08/DL-Argo-080923-01.jpg',
+        'golden-state-warriors-trinet-va-digilens'           => 'wp-content/uploads/2025/03/gsw-trinet-digilens-1024x533.png',
+        'golden-state-warriors-trinet-va-digilens-hop-tac-thuc-day-do' => 'wp-content/uploads/2025/03/gsw-trinet-digilens-1024x533.png',
+        'snapdragon-ai-xr'                                   => 'wp-content/uploads/2023/05/Mojo-DL-Announcement-e1685481564178-1024x678.png',
+        'snapdragon-tich-hop-ai-vao-thiet-bi-xr'             => 'wp-content/uploads/2023/05/Mojo-DL-Announcement-e1685481564178-1024x678.png',
+        'area-webinar-ar-industrial'                         => 'wp-content/uploads/2023/05/Tactile-PR-Social-Image.png',
+        'tro-chuyen-cung-area-nhung-bien-gioi-moi-cho-digilens-va-cac' => 'wp-content/uploads/2023/05/Tactile-PR-Social-Image.png',
+        'stanford-ewear-symposium'                           => 'wp-content/uploads/2023/05/wisear-graphic-1024x707.jpeg',
+        'hoi-thao-stanford-ewear-ong-dan-song-holographic-digilens-la' => 'wp-content/uploads/2023/05/wisear-graphic-1024x707.jpeg',
+        'awe-23-kien-tao-thuc-te-moi-voi-snapdragon-ngay-hom-nay' => 'wp-content/uploads/2023/08/DL-Argo-080923-01.jpg',
+        'awe-23-kinh-thong-minh-digilens-argo-cach-phat-trien-nen-tan' => 'wp-content/uploads/2021/05/dv1-smartglasses-hero-v3-1024x559.jpg',
+        'video-hoi-nghi-thuong-dinh-chinh-phu-the-gioi-the-gioi-ao-va' => 'wp-content/uploads/2021/05/about-dv1-separated-768x597.jpg',
+        'the-ar-show-tao-ong-dan-song-de-hien-thuc-hoa-kinh-thong-min' => 'wp-content/uploads/2023/03/DL-Industry-Social-031623-1919-x-886.png',
+        'video-nguyen-ly-hoat-dong-cua-ong-dan-song-digilens' => 'wp-content/uploads/2023/05/Mojo-DL-Announcement-e1685481564178-1024x678.png',
+        'awe-22-kien-tao-nen-tang-xr-cho-cong-nghiep-nhe'    => 'wp-content/uploads/2024/09/DL-Avegant-PR-graphic-090424-01.png',
+    );
+
+    if ( isset( $known_slug_images[ $slug ] ) && is_file( DIGILENS_SNAPSHOT_DIR . '/' . $known_slug_images[ $slug ] ) ) {
+        return trailingslashit( DIGILENS_SNAPSHOT_URI ) . $known_slug_images[ $slug ];
+    }
+
+    // 4. Check category specific rotating pool
+    $cats = wp_get_post_categories( $post_id, array( 'fields' => 'slugs' ) );
+    if ( is_array( $cats ) ) {
+        if ( in_array( 'news', $cats, true ) ) {
+            $pick = $pool_news[ $post_id % count( $pool_news ) ];
+            return trailingslashit( DIGILENS_SNAPSHOT_URI ) . $pick;
+        }
+        if ( in_array( 'media', $cats, true ) ) {
+            $pick = $pool_media[ $post_id % count( $pool_media ) ];
+            return trailingslashit( DIGILENS_SNAPSHOT_URI ) . $pick;
+        }
+        if ( in_array( 'blogs', $cats, true ) ) {
+            $pick = $pool_blog[ $post_id % count( $pool_blog ) ];
+            return trailingslashit( DIGILENS_SNAPSHOT_URI ) . $pick;
+        }
+        if ( in_array( 'press-release', $cats, true ) ) {
+            $pick = $pool_pr[ $post_id % count( $pool_pr ) ];
+            return trailingslashit( DIGILENS_SNAPSHOT_URI ) . $pick;
+        }
+    }
+
+    // Guaranteed fallback
+    $pick = $pool_blog[ $post_id % count( $pool_blog ) ];
+    return trailingslashit( DIGILENS_SNAPSHOT_URI ) . $pick;
+}
+
+function digilens_inject_dynamic_media_widgets( $html ) {
+    // Only apply if the page contains one of the media widgets
+    if ( strpos( $html, 'data-id="e945b06"' ) === false && strpos( $html, 'data-id="c3ac88f"' ) === false ) {
+        return $html;
+    }
+
+    $widgets = array(
+        array(
+            'id'          => 'e945b06',
+            'cat_slug'    => 'press-release',
+            'count'       => 6,
+            'btn_text'    => 'ĐỌC THÊM »',
+            'paged_param' => 'pr_paged',
+        ),
+        array(
+            'id'          => 'c3ac88f',
+            'cat_slug'    => 'blogs',
+            'count'       => 4,
+            'btn_text'    => 'ĐỌC THÊM »',
+            'paged_param' => 'blog_paged',
+        ),
+        array(
+            'id'          => 'ba15212',
+            'cat_slug'    => 'media',
+            'count'       => 3,
+            'btn_text'    => 'XEM THÊM »',
+            'paged_param' => 'media_paged',
+        ),
+        array(
+            'id'          => 'fad78d8',
+            'cat_slug'    => 'news',
+            'count'       => 4,
+            'btn_text'    => 'ĐỌC THÊM »',
+            'paged_param' => 'news_paged',
+        ),
+    );
+
+    foreach ( $widgets as $cfg ) {
+        $wid         = $cfg['id'];
+        $cat_slug    = $cfg['cat_slug'];
+        $count       = $cfg['count'];
+        $btn_text    = $cfg['btn_text'];
+        $paged_param = $cfg['paged_param'];
+
+        $paged = 1;
+        if ( isset( $_GET[ $paged_param ] ) ) {
+            $paged = max( 1, (int) $_GET[ $paged_param ] );
+        } elseif ( $cat_slug === 'press-release' ) {
+            $uri_path = trim( (string) wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ), '/' );
+            if ( preg_match( '#^media/(\d+)#i', $uri_path, $pm ) ) {
+                $paged = max( 1, (int) $pm[1] );
+            }
+        }
+
+        $query = new WP_Query( array(
+            'post_type'      => 'post',
+            'post_status'    => 'publish',
+            'category_name'  => $cat_slug,
+            'posts_per_page' => $count,
+            'paged'          => $paged,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+        ) );
+
+        if ( ! $query->have_posts() && $query->max_num_pages > 0 && $paged > $query->max_num_pages ) {
+            $paged = $query->max_num_pages;
+            $query = new WP_Query( array(
+                'post_type'      => 'post',
+                'post_status'    => 'publish',
+                'category_name'  => $cat_slug,
+                'posts_per_page' => $count,
+                'paged'          => $paged,
+                'orderby'        => 'date',
+                'order'          => 'DESC',
+            ) );
+        }
+
+        if ( ! $query->have_posts() ) {
+            continue;
+        }
+
+        $cards_html = '';
+        while ( $query->have_posts() ) {
+            $query->the_post();
+            $post_id   = get_the_ID();
+            $title     = get_the_title();
+            $permalink = get_permalink();
+
+            $ext_url = get_post_meta( $post_id, '_digilens_external_url', true );
+            $card_link = $ext_url ? $ext_url : $permalink;
+            $target_attr = $ext_url ? ' target="_blank" rel="noopener noreferrer"' : '';
+
+            $feat_img = digilens_get_card_thumbnail( $post_id, $title );
+            $date_str = get_the_date( 'j \t\h\á\n\g n, Y' );
+
+            $img_tag = '<a class="elementor-post__thumbnail__link" href="' . esc_url( $card_link ) . '" tabindex="-1"' . $target_attr . '>'
+                     . '<div class="elementor-post__thumbnail">'
+                     . '<img alt="' . esc_attr( $title ) . '" class="attachment-medium size-medium" decoding="async" height="157" src="' . esc_url( $feat_img ) . '" width="300" />'
+                     . '</div>'
+                     . '</a>';
+
+            $cards_html .= '<article class="elementor-post elementor-grid-item post-' . esc_attr( $post_id ) . ' post type-post status-publish format-standard has-post-thumbnail hentry category-' . esc_attr( $cat_slug ) . '" role="listitem">'
+                         . '<div class="elementor-post__card">'
+                         . $img_tag
+                         . '<div class="elementor-post__avatar"></div>'
+                         . '<div class="elementor-post__text">'
+                         . '<h3 class="elementor-post__title">'
+                         . '<a href="' . esc_url( $card_link ) . '"' . $target_attr . '>' . esc_html( $title ) . '</a>'
+                         . '</h3>'
+                         . '<a aria-label="' . esc_attr( $btn_text . ' ' . $title ) . '" class="elementor-post__read-more" href="' . esc_url( $card_link ) . '" tabindex="-1"' . $target_attr . '>'
+                         . esc_html( $btn_text )
+                         . '</a>'
+                         . '</div>'
+                         . '<div class="elementor-post__meta-data">'
+                         . '<span class="elementor-post-date">' . esc_html( $date_str ) . '</span>'
+                         . '</div>'
+                         . '</div>'
+                         . '</article>';
+        }
+        wp_reset_postdata();
+
+        $pag_html = '';
+        if ( $query->max_num_pages > 1 ) {
+            $base_url = home_url( '/media/' );
+            $pag_links = paginate_links( array(
+                'base'      => add_query_arg( $paged_param, '%#%', $base_url ),
+                'format'    => '',
+                'current'   => $paged,
+                'total'     => $query->max_num_pages,
+                'prev_text' => '« Trước',
+                'next_text' => 'Tiếp »',
+                'type'      => 'plain',
+            ) );
+            if ( $pag_links ) {
+                $pag_html = '<nav class="elementor-pagination" aria-label="Phân trang">' . $pag_links . '</nav>';
+            }
+        }
+
+        $wid_needle = 'data-id="' . $wid . '"';
+        $w_idx = strpos( $html, $wid_needle );
+        if ( $w_idx === false ) {
+            continue;
+        }
+
+        $c_tag = '<div class="elementor-widget-container">';
+        $c_idx = strpos( $html, $c_tag, $w_idx );
+        if ( $c_idx === false ) {
+            continue;
+        }
+
+        $content_start = $c_idx + strlen( $c_tag );
+        $chunk = substr( $html, $content_start, 25000 );
+
+        $nav_idx = strpos( $chunk, '<nav' );
+        if ( $nav_idx !== false && strpos( substr( $chunk, $nav_idx, 300 ), 'elementor-pagination' ) !== false ) {
+            $nav_end = strpos( $chunk, '</nav>', $nav_idx );
+            $content_end = ( $nav_end !== false ) ? ( $content_start + $nav_end + strlen( '</nav>' ) ) : ( $content_start + strlen( $chunk ) );
+        } else {
+            $last_art = strrpos( $chunk, '</article>' );
+            if ( $last_art !== false ) {
+                $div_after = strpos( $chunk, '</div>', $last_art );
+                $content_end = ( $div_after !== false ) ? ( $content_start + $div_after + strlen( '</div>' ) ) : ( $content_start + strlen( $chunk ) );
+            } else {
+                $content_end = $content_start;
+            }
+        }
+
+        $new_inner = "\n" . '<div class="elementor-posts-container elementor-posts elementor-posts--skin-cards elementor-grid" role="list">'
+                   . $cards_html
+                   . '</div>'
+                   . "\n"
+                   . $pag_html
+                   . "\n";
+
+        // Perform exact slice replacement with zero broken tags
+        $html = substr( $html, 0, $content_start ) . $new_inner . substr( $html, $content_end );
+    }
+
+    return $html;
+}
+
 function digilens_rewrite_snapshot_html( $html, $snapshot_rel ) {
     $html = digilens_strip_cookie_consent( $html );
     $html = digilens_replace_entire_header( $html );
     $html = digilens_replace_entire_footer( $html );
+    $html = digilens_inject_dynamic_media_widgets( $html );
     $html = digilens_replace_hubspot_forms( $html );
     $html = digilens_fix_pagination( $html, $snapshot_rel );
+
+    // 0. Strip broken speculation rules and emoji scripts from snapshot
+    $html = preg_replace( '#<script\b[^>]*type=["\']speculationrules["\'][^>]*>[\s\S]*?</script>#is', '', $html );
+    $html = preg_replace( '#<script\b[^>]*>\s*window\._wpemojiSettings[\s\S]*?</script>#is', '', $html );
+
+    $head_safety_script = '<script>
+    (function() {
+        if (window.wp && window.wp.apiFetch) {
+            try {
+                window.wp.apiFetch.use(function(options, next) {
+                    if (options && options.path && options.path.indexOf("/wp/v2/users/me") !== -1) {
+                        return Promise.resolve({ id: 1, name: "Guest", slug: "guest", capabilities: { edit_posts: true } });
+                    }
+                    return next(options).catch(function(err) {
+                        if (options && options.path && options.path.indexOf("/wp/v2/users/me") !== -1) {
+                            return { id: 1, name: "Guest", slug: "guest", capabilities: {} };
+                        }
+                        throw err;
+                    });
+                });
+            } catch(e) {}
+        }
+        window.addEventListener("unhandledrejection", function(e) {
+            if (e && e.reason && (e.reason.name === "ChunkLoadError" || (e.reason.message && e.reason.message.indexOf("ChunkLoadError") !== -1))) {
+                e.preventDefault();
+            }
+        });
+    })();
+    </script>';
+    if ( strpos( $html, '</head>' ) !== false ) {
+        $html = str_replace( '</head>', $head_safety_script . "\n</head>", $html );
+    }
 
     // 1. Rewrite AJAX & REST endpoints from remote domain to local WordPress
     $local_ajax = admin_url( 'admin-ajax.php' );
@@ -525,6 +861,8 @@ function digilens_rewrite_snapshot_html( $html, $snapshot_rel ) {
         $html = preg_replace( '#(<body\b[^>]*>)#i', '$1' . $body_open, $html, 1 );
     }
     if ( stripos( $html, '</body>' ) !== false ) { $html = preg_replace( '#</body>#i', $wp_footer . "\n</body>", $html, 1 ); }
+    // Clean up speculation rules from both snapshot and WordPress core
+    $html = preg_replace( '#<script\b[^>]*type=["\']speculationrules["\'][^>]*>[\s\S]*?</script>#is', '', $html );
     return $html;
 }
 

@@ -765,3 +765,125 @@ a,
     color: #00b0f0 !important;
     border-color: #00b0f0 !important;
 }
+
+/* ==========================================================================
+   FIX FOR MEDIA BOTTOM CTA SECTION ("Một công ty có tầm nhìn dẫn đầu xu hướng")
+   ========================================================================== */
+.elementor-element-1e89f056,
+section[data-id="1e89f056"],
+.elementor-section.elementor-element-1e89f056 {
+    background-color: #000002 !important;
+    background: #000002 !important;
+    color: #ffffff !important;
+    position: relative !important;
+    padding: 90px 0 100px 0 !important;
+    overflow: visible !important;
+}
+
+.elementor-element-1e89f056 .elementor-shape-top svg,
+section[data-id="1e89f056"] .elementor-shape-top svg {
+    fill: #ffffff !important;
+    width: calc(230% + 1.3px) !important;
+    height: 100px !important;
+    transform: translateX(-50%) rotateY(180deg) !important;
+}
+
+.elementor-element-1e89f056 .elementor-shape-top .elementor-shape-fill,
+section[data-id="1e89f056"] .elementor-shape-top .elementor-shape-fill {
+    fill: #ffffff !important;
+}
+
+.elementor-element-14e8d097 .elementor-heading-title,
+section[data-id="1e89f056"] .elementor-heading-title,
+section[data-id="1e89f056"] h2 {
+    color: #ffffff !important;
+    font-size: 45px !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    margin-bottom: 30px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    text-align: left !important;
+}
+
+@media (max-width: 1024px) {
+    .elementor-element-14e8d097 .elementor-heading-title,
+    section[data-id="1e89f056"] .elementor-heading-title {
+        font-size: 34px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .elementor-element-14e8d097 .elementor-heading-title,
+    section[data-id="1e89f056"] .elementor-heading-title {
+        font-size: 28px !important;
+        text-align: center !important;
+    }
+}
+
+.elementor-element-1626f578 .elementor-button,
+section[data-id="1e89f056"] .elementor-button {
+    background: linear-gradient(135deg, #1b00ff 0%, #4a86ff 100%) !important;
+    color: #ffffff !important;
+    border-radius: 30px !important;
+    padding: 14px 32px !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    letter-spacing: 0.5px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    box-shadow: 0 4px 15px rgba(27, 0, 255, 0.4) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    text-decoration: none !important;
+}
+
+.elementor-element-1626f578 .elementor-button:hover,
+section[data-id="1e89f056"] .elementor-button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(74, 134, 255, 0.6) !important;
+    color: #ffffff !important;
+}
+
+.elementor-element-748007eb img,
+section[data-id="1e89f056"] .elementor-widget-image img {
+    border-radius: 28px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    max-width: 100% !important;
+    height: auto !important;
+    display: block !important;
+}
+
+section[data-id="1e89f056"] .elementor-container {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+section[data-id="1e89f056"] .elementor-element-3dcbbbd5 {
+    width: 50% !important;
+    padding-right: 40px !important;
+}
+
+section[data-id="1e89f056"] .elementor-element-24ec48a9 {
+    width: 50% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+@media (max-width: 767px) {
+    section[data-id="1e89f056"] .elementor-container {
+        flex-direction: column !important;
+        text-align: center !important;
+    }
+    section[data-id="1e89f056"] .elementor-element-3dcbbbd5,
+    section[data-id="1e89f056"] .elementor-element-24ec48a9 {
+        width: 100% !important;
+        padding-right: 0 !important;
+        margin-bottom: 30px !important;
+    }
+}

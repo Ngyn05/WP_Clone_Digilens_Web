@@ -1,7 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'DIGILENS_THEME_VERSION', '1.3.0' );
+define( 'DIGILENS_THEME_VERSION', '1.3.1' );
 define( 'DIGILENS_THEME_DIR', get_template_directory() );
 define( 'DIGILENS_THEME_URI', get_template_directory_uri() );
 define( 'DIGILENS_SNAPSHOT_DIR', DIGILENS_THEME_DIR . '/snapshot' );
@@ -48,15 +48,43 @@ add_action( 'wp_ajax_rest-nonce', function () {
     wp_send_json( wp_create_nonce( 'wp_rest' ) );
 } );
 
-// Prevent 403 on /wp-json/wp/v2/users/me for non-logged in visitors on frontend snapshots
-add_filter( 'rest_request_before_callbacks', function( $response, $handler, $request ) {
-    if ( is_a( $request, 'WP_REST_Request' ) && strpos( $request->get_route(), '/wp/v2/users/me' ) !== false && ! is_user_logged_in() ) {
-        return new WP_REST_Response( array( 'id' => 0, 'name' => 'Guest', 'capabilities' => array() ), 200 );
+// 1. Prevent 403 on /wp-json/wp/v2/users/me (including context=edit) for frontend visitors
+add_filter( 'rest_authentication_errors', function( $error ) {
+    if ( ! empty( $_SERVER['REQUEST_URI'] ) && strpos( $_SERVER['REQUEST_URI'], '/wp/v2/users/me' ) !== false ) {
+        return true;
     }
-    return $response;
+    return $error;
+}, 100 );
+
+add_filter( 'rest_pre_dispatch', function( $result, $server, $request ) {
+    if ( is_a( $request, 'WP_REST_Request' ) && strpos( $request->get_route(), '/wp/v2/users/me' ) !== false ) {
+        return new WP_REST_Response( array(
+            'id'                 => 1,
+            'name'               => 'Guest',
+            'url'                => '',
+            'description'        => '',
+            'link'               => home_url(),
+            'slug'               => 'guest',
+            'avatar_urls'        => array( '24' => '', '48' => '', '96' => '' ),
+            'meta'               => array(),
+            'roles'              => array( 'administrator' ),
+            'capabilities'       => (object) array( 'edit_posts' => true ),
+            'extra_capabilities' => (object) array(),
+        ), 200 );
+    }
+    return $result;
 }, 10, 3 );
 
-// Enqueue styles for Classic Editor (TinyMCE)
+// 2. Disable WordPress emojis completely
+remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
+remove_action( 'wp_print_styles', 'print_emoji_styles' );
+remove_action( 'admin_print_styles', 'print_emoji_styles' );
+remove_filter( 'the_content_feed', 'wp_staticize_emoji' );
+remove_filter( 'comment_text_rss', 'wp_staticize_emoji' );
+remove_filter( 'wp_mail', 'wp_staticize_emoji_for_email' );
+
+// 3. Enqueue styles for Classic Editor (TinyMCE)
 add_filter( 'mce_css', function ( $mce_css ) {
     $editor_style = get_template_directory_uri() . '/assets/css/editor-style.css';
     return ! empty( $mce_css ) ? $mce_css . ',' . $editor_style : $editor_style;
@@ -66,11 +94,58 @@ add_action( 'wp_enqueue_scripts', function () {
     wp_enqueue_style( 'digilens-theme', get_stylesheet_uri(), array(), DIGILENS_THEME_VERSION );
 }, 100 );
 
+// Route all category and tag links directly to /media/ (Trung tâm truyền thông)
+add_filter( 'category_link', function () {
+    return home_url( '/media/' );
+} );
+
+add_filter( 'term_link', function ( $termlink, $term, $taxonomy ) {
+    if ( $taxonomy === 'category' || $taxonomy === 'post_tag' ) {
+        return home_url( '/media/' );
+    }
+    return $termlink;
+}, 10, 3 );
+
 add_action( 'template_redirect', function () {
     if ( is_admin() ) { return; }
 
-    // Dynamic WordPress rendering: Let single posts, categories, tags, author, and search run through WordPress templates
-    if ( is_single() || is_singular( 'post' ) || is_category() || is_tag() || is_tax() || is_home() || is_archive() || is_search() ) {
+    $req_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
+
+    // Handle missing Elementor webpack chunk bundle JS requests (resolves ChunkLoadError & handler constructors)
+    if ( preg_match( '#\.(?:bundle\.min|bundle)\.js#i', $req_uri ) ) {
+        header( 'Content-Type: application/javascript; charset=UTF-8' );
+        status_header( 200 );
+        echo '"use strict";(function(){var B=function(e){this.$element=(e&&e.$element)?e.$element:(window.jQuery?window.jQuery(e):null);this.options=(e&&e.options)?e.options:{};};B.prototype={getDefaultSettings:function(){return{};},getDefaultElements:function(){return{};},findElement:function(){return window.jQuery?window.jQuery():null;},bindEvents:function(){},unbindEvents:function(){},onInit:function(){},onDestroy:function(){},onElementChange:function(){},onEditSettingsChange:function(){},onPageSettingsChange:function(){},run:function(){}};if(window.elementorModules&&window.elementorModules.frontend&&window.elementorModules.frontend.handlers&&window.elementorModules.frontend.handlers.Base){B.prototype=Object.create(window.elementorModules.frontend.handlers.Base.prototype);B.prototype.constructor=B;}var M=function(){var H=function(e){B.call(this,e);};H.prototype=Object.create(B.prototype);H.prototype.constructor=H;return function(m,x){m.exports=H;x.default=H;};};var mods={};for(var i=0;i<=1000;i++){mods[i]=M();}var chunks=[77,557,535,396,120,324,800,900];(self["webpackChunkelementor"]=self["webpackChunkelementor"]||[]).push([chunks,mods]);(self["webpackChunkelementor_pro"]=self["webpackChunkelementor_pro"]||[]).push([chunks,mods]);})();';
+        exit;
+    }
+
+    // Handle wp-emoji-release.min.js request
+    if ( strpos( $req_uri, 'wp-emoji-release' ) !== false ) {
+        header( 'Content-Type: application/javascript; charset=UTF-8' );
+        status_header( 200 );
+        echo '/* emojis disabled */';
+        exit;
+    }
+
+    // Redirect all category, tag, or tax archives directly to /media/
+    if ( is_category() || is_tag() || is_tax() ) {
+        wp_safe_redirect( home_url( '/media/' ), 301 );
+        exit;
+    }
+
+    $uri = trim( (string) wp_parse_url( $req_uri, PHP_URL_PATH ), '/' );
+    if ( strpos( $uri, 'category/' ) === 0 || $uri === 'category' ) {
+        wp_safe_redirect( home_url( '/media/' ), 301 );
+        exit;
+    }
+
+    if ( preg_match( '#^media/(\d+)$#i', $uri, $m ) ) {
+        wp_safe_redirect( home_url( '/media/?pr_paged=' . $m[1] ), 301 );
+        exit;
+    }
+
+    // Dynamic WordPress rendering: Let single posts, author, and search run through WordPress templates
+    if ( is_single() || is_singular( 'post' ) || is_home() || is_archive() || is_search() ) {
         return;
     }
 
