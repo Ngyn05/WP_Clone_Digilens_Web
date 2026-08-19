@@ -555,23 +555,30 @@ get_header();
             top: 16px;
             right: 16px;
             background: #f1f5f9;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #cbd5e1;
             color: #475569;
             width: 32px;
             height: 32px;
-            border-radius: 50%;
-            font-size: 1.3rem;
+            border-radius: 50% !important;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 0 !important;
+            margin: 0 !important;
+            outline: none !important;
+            box-shadow: none !important;
+            overflow: hidden !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
             transition: all 0.2s ease;
             z-index: 10;
         }
 
         .dl-modal-close:hover {
-            background: #e2e8f0;
-            color: #0f172a;
+            background: #0f172a;
+            border-color: #0f172a;
+            color: #ffffff;
         }
 
         .dl-modal-header {
@@ -1028,7 +1035,9 @@ get_header();
     <!-- 5. Product Quote Modal Window -->
     <div class="dl-modal-overlay" id="product-modal">
         <div class="dl-modal-container" style="max-width:580px;">
-            <button type="button" class="dl-modal-close" onclick="closeProductModal()" aria-label="Đóng">&times;</button>
+            <button type="button" class="dl-modal-close" onclick="closeProductModal()" aria-label="Đóng">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
             <div class="dl-modal-header" style="margin-bottom:16px;">
                 <span class="dl-modal-cat" id="modal-cat">Danh mục</span>
                 <h2 class="dl-modal-title" id="modal-title" style="margin-bottom:6px;">Tên sản phẩm</h2>

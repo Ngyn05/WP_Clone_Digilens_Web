@@ -10,27 +10,109 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 get_header();
 ?>
 
-<div class="dl-archive-header" style="background: linear-gradient(135deg, #00163f 0%, #000a73 100%); color: #ffffff; padding: 60px 0; text-align: center;">
-    <div class="ast-container" style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
-        <span style="display: inline-block; background: rgba(0,176,240,0.2); border: 1px solid #00b0f0; color: #00b0f0; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; letter-spacing: 1.5px; margin-bottom: 12px;">
+<style>
+.dl-archive-header {
+    background: linear-gradient(135deg, #00163f 0%, #000a73 100%);
+    color: #ffffff;
+    padding: 50px 0 45px 0;
+    text-align: center;
+}
+.dl-archive-title {
+    font-size: clamp(1.6rem, 5vw, 2.5rem);
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 10px 0;
+    line-height: 1.3;
+}
+.dl-archive-desc {
+    font-size: clamp(0.95rem, 3vw, 1.1rem);
+    color: #cbd5e1;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+.dl-archive-body {
+    background: #ffffff;
+    padding: 45px 0 80px 0;
+}
+.dl-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
+    margin-bottom: 50px;
+}
+.dl-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.dl-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+.dl-card-img-link {
+    display: block;
+    overflow: hidden;
+    height: 210px;
+    background: #f8fafc;
+}
+.dl-card-body {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+@media (max-width: 640px) {
+    .dl-archive-header {
+        padding: 35px 0 30px 0;
+    }
+    .dl-archive-body {
+        padding: 25px 0 50px 0;
+    }
+    .dl-posts-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-bottom: 35px;
+    }
+    .dl-card-img-link {
+        height: 180px;
+    }
+    .dl-card-body {
+        padding: 16px;
+    }
+    .dl-card-title {
+        font-size: 1.15rem !important;
+    }
+}
+</style>
+
+<div class="dl-archive-header">
+    <div class="ast-container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <span style="display: inline-block; background: rgba(0,176,240,0.2); border: 1px solid #00b0f0; color: #00b0f0; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; letter-spacing: 1.5px; margin-bottom: 12px;">
             CHUYÊN MỤC
         </span>
-        <h1 class="dl-archive-title" style="font-size: 2.5rem; font-weight: 700; color: #ffffff; margin: 0 0 12px 0;">
+        <h1 class="dl-archive-title">
             <?php single_cat_title(); ?>
         </h1>
         <?php if ( category_description() ) : ?>
-            <div class="dl-archive-desc" style="font-size: 1.1rem; color: #cbd5e1; max-width: 700px; margin: 0 auto;">
+            <div class="dl-archive-desc">
                 <?php echo category_description(); ?>
             </div>
         <?php endif; ?>
     </div>
 </div>
 
-<div class="dl-archive-body" style="background: #ffffff; padding: 60px 0 100px 0;">
-    <div class="ast-container" style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
+<div class="dl-archive-body">
+    <div class="ast-container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
         
         <?php if ( have_posts() ) : ?>
-            <div class="dl-posts-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 32px; margin-bottom: 60px;">
+            <div class="dl-posts-grid">
                 <?php while ( have_posts() ) : the_post(); 
                     $feat_img = '';
                     if ( has_post_thumbnail() ) {
@@ -44,28 +126,28 @@ get_header();
                     $target_attr = $ext_url ? ' target="_blank" rel="noopener noreferrer"' : '';
                     $btn_text = ( is_category( 'media' ) || has_category( 'media' ) ) ? 'Xem thêm' : 'Đọc thêm';
                 ?>
-                <article id="post-<?php the_ID(); ?>" class="dl-card" style="background: #ffffff; border: 1px solid #f1f5f9; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.04); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;">
+                <article id="post-<?php the_ID(); ?>" class="dl-card">
                     <?php if ( $feat_img ) : ?>
-                        <a href="<?php echo esc_url( $card_link ); ?>"<?php echo $target_attr; // phpcs:ignore ?> class="dl-card-img-link" style="display: block; overflow: hidden; height: 210px; background: #f8fafc;">
+                        <a href="<?php echo esc_url( $card_link ); ?>"<?php echo $target_attr; // phpcs:ignore ?> class="dl-card-img-link">
                             <img src="<?php echo esc_url( $feat_img ); ?>" alt="<?php the_title_attribute(); ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;" />
                         </a>
                     <?php endif; ?>
                     
-                    <div class="dl-card-body" style="padding: 24px; display: flex; flex-direction: column; flex-grow: 1;">
-                        <div class="dl-card-meta" style="margin-bottom: 10px;">
+                    <div class="dl-card-body">
+                        <div class="dl-card-meta" style="margin-bottom: 8px;">
                             <span class="dl-card-date" style="font-size: 0.85rem; color: #94a3b8;">
                                 <?php echo esc_html( get_the_date( 'j \t\h\á\n\g n, Y' ) ); ?>
                             </span>
                         </div>
                         
-                        <h2 class="dl-card-title" style="font-size: 1.25rem; font-weight: 700; line-height: 1.4; margin: 0 0 12px 0;">
+                        <h2 class="dl-card-title" style="font-size: 1.22rem; font-weight: 700; line-height: 1.4; margin: 0 0 10px 0;">
                             <a href="<?php echo esc_url( $card_link ); ?>"<?php echo $target_attr; // phpcs:ignore ?> style="color: #000a73; text-decoration: none;">
                                 <?php the_title(); ?>
                             </a>
                         </h2>
                         
-                        <div class="dl-card-excerpt" style="font-size: 0.95rem; color: #64748b; line-height: 1.6; margin-bottom: 20px; flex-grow: 1;">
-                            <?php echo wp_trim_words( get_the_excerpt(), 24, '...' ); ?>
+                        <div class="dl-card-excerpt" style="font-size: 0.92rem; color: #64748b; line-height: 1.6; margin-bottom: 18px; flex-grow: 1;">
+                            <?php echo wp_trim_words( get_the_excerpt(), 22, '...' ); ?>
                         </div>
                         
                         <div class="dl-card-action">
