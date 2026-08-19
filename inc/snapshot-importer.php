@@ -6,7 +6,7 @@ function digilens_snapshot_extract( $html, $pattern, $default = '' ) {
 }
 
 function digilens_snapshot_is_infrastructure( $rel ) {
-    return (bool) preg_match( '#^(?:wp-json|feed/|comments/|forms/|gtag/|category/|author/|wp-content/|wp-includes/)#i', $rel );
+    return (bool) preg_match( '#(?:^|/)(?:wp-json|feed|comments|forms|gtag|category|author|wp-content|wp-includes|s)(?:/|$)|media/\d+/#i', $rel );
 }
 
 function digilens_snapshot_find_existing_by_meta( $rel, $post_type ) {
@@ -356,8 +356,35 @@ function digilens_snapshot_import_all() {
         }
     }
 
+    // Dọn dẹp các trang rác mặc định hoặc phân trang cũ
+    $sample_page = get_page_by_path( 'sample-page' );
+    if ( $sample_page ) {
+        wp_delete_post( $sample_page->ID, true );
+    }
+
+    // Dọn dẹp sub-page phân trang media cũ nếu có
+    $media_page = get_page_by_path( 'media' );
+    if ( $media_page ) {
+        $media_subpages = get_posts( array(
+            'post_type'      => 'page',
+            'post_parent'    => $media_page->ID,
+            'post_status'    => 'any',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+        ) );
+        foreach ( $media_subpages as $sub_id ) {
+            wp_delete_post( $sub_id, true );
+        }
+    }
+
     if ( ! get_option( 'permalink_structure' ) ) { update_option( 'permalink_structure', '/%postname%/' ); }
     flush_rewrite_rules();
+    
+    // Tự động tái tạo XML Sitemap và robots.txt
+    if ( function_exists( 'digilens_update_physical_seo_files' ) ) {
+        digilens_update_physical_seo_files();
+    }
+
     update_option( 'digilens_snapshot_import_stats', array( 'pages' => $pages, 'posts' => $posts, 'time' => time() ) );
     return array( $pages, $posts );
 }
@@ -371,10 +398,47 @@ function digilens_snapshot_admin_page() {
     if ( isset( $_POST['digilens_resync'] ) ) {
         check_admin_referer( 'digilens_resync' );
         list( $pages, $posts ) = digilens_snapshot_import_all();
-        echo '<div class="notice notice-success"><p>Đã đồng bộ 4 chuyên mục vào database: ' . esc_html( $pages ) . ' trang, ' . esc_html( $posts ) . ' bài viết.</p></div>';
+        if ( function_exists( 'digilens_update_physical_seo_files' ) ) {
+            digilens_update_physical_seo_files();
+        }
+        echo '<div class="notice notice-success is-dismissible"><p><strong>Thành công!</strong> Đã đồng bộ toàn bộ cơ sở dữ liệu: ' . esc_html( $pages ) . ' trang, ' . esc_html( $posts ) . ' bài viết. Đã cập nhật <code>sitemap.xml</code> và <code>robots.txt</code>.</p></div>';
     }
+
     $stats = get_option( 'digilens_snapshot_import_stats', array() );
-    echo '<div class="wrap"><h1>DigiLens Snapshot &amp; 4 Chuyên Mục Database</h1><p>Đồng bộ toàn bộ bài viết theo đúng 4 Chuyên mục (Thông cáo báo chí, Blog, Truyền thông, Tin tức) vào WordPress database.</p>';
-    if ( $stats ) { echo '<p><strong>Lần đồng bộ gần nhất:</strong> ' . esc_html( isset( $stats['pages'] ) ? $stats['pages'] : 0 ) . ' trang, ' . esc_html( isset( $stats['posts'] ) ? $stats['posts'] : 0 ) . ' bài viết.</p>'; }
-    echo '<form method="post">'; wp_nonce_field( 'digilens_resync' ); submit_button( 'Đồng bộ lại toàn bộ Database', 'primary', 'digilens_resync' ); echo '</form></div>';
+    $sitemap_url = home_url( '/sitemap.xml' );
+    $robots_url  = home_url( '/robots.txt' );
+
+    $total_pages = wp_count_posts( 'page' )->publish;
+    $total_posts = wp_count_posts( 'post' )->publish;
+    $total_products = function_exists( 'wc_get_products' ) ? wp_count_posts( 'product' )->publish : 0;
+    
+    $sitemap_entries = function_exists( 'digilens_get_sitemap_entries' ) ? count( digilens_get_sitemap_entries() ) : 0;
+
+    echo '<div class="wrap" style="max-width: 1100px;">';
+    echo '<h1 style="color: #00B0F0; font-weight: 700; margin-bottom: 20px;">DigiLens Quản trị Database &amp; SEO Engine</h1>';
+    echo '<p style="font-size: 15px; color: #555;">Đồng bộ toàn bộ Trang, Bài viết 4 Chuyên mục và Sản phẩm vào WordPress Database; đồng thời tự động cập nhật XML Sitemap và Robots.txt chuẩn SEO quốc tế.</p>';
+
+    echo '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 25px 0;">';
+    echo '<div style="background: #fff; border: 1px solid #ccd0d4; border-left: 4px solid #00B0F0; padding: 18px; border-radius: 6px;"><h3 style="margin: 0; font-size: 24px; color: #00B0F0;">' . esc_html( $total_pages ) . '</h3><p style="margin: 5px 0 0; color: #666; font-weight: 600;">Trang (Pages) đã xuất bản</p></div>';
+    echo '<div style="background: #fff; border: 1px solid #ccd0d4; border-left: 4px solid #2271b1; padding: 18px; border-radius: 6px;"><h3 style="margin: 0; font-size: 24px; color: #2271b1;">' . esc_html( $total_posts ) . '</h3><p style="margin: 5px 0 0; color: #666; font-weight: 600;">Bài viết (Posts) 4 Chuyên mục</p></div>';
+    echo '<div style="background: #fff; border: 1px solid #ccd0d4; border-left: 4px solid #00a32a; padding: 18px; border-radius: 6px;"><h3 style="margin: 0; font-size: 24px; color: #00a32a;">' . esc_html( $total_products ) . '</h3><p style="margin: 5px 0 0; color: #666; font-weight: 600;">Sản phẩm (WooCommerce)</p></div>';
+    echo '<div style="background: #fff; border: 1px solid #ccd0d4; border-left: 4px solid #d63638; padding: 18px; border-radius: 6px;"><h3 style="margin: 0; font-size: 24px; color: #d63638;">' . esc_html( $sitemap_entries ) . '</h3><p style="margin: 5px 0 0; color: #666; font-weight: 600;">Tổng URLs trong XML Sitemap</p></div>';
+    echo '</div>';
+
+    echo '<div style="background: #fff; border: 1px solid #ccd0d4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">';
+    echo '<h2 style="font-size: 18px; margin-top: 0;">🌐 Liên kết SEO Công khai</h2>';
+    echo '<p><strong>XML Sitemap:</strong> <a href="' . esc_url( $sitemap_url ) . '" target="_blank" style="font-weight: 600; color: #00B0F0;">' . esc_html( $sitemap_url ) . ' &raquo;</a> (Tự động tạo giao diện XSL đẹp mắt khi mở trên trình duyệt)</p>';
+    echo '<p><strong>Robots.txt:</strong> <a href="' . esc_url( $robots_url ) . '" target="_blank" style="font-weight: 600; color: #00B0F0;">' . esc_html( $robots_url ) . ' &raquo;</a></p>';
+    echo '</div>';
+
+    echo '<div style="background: #fff; border: 1px solid #ccd0d4; padding: 20px; border-radius: 6px;">';
+    echo '<h2 style="font-size: 18px; margin-top: 0;">⚡ Đồng bộ &amp; Tái tạo</h2>';
+    echo '<p>Nhấp nút bên dưới để quét toàn bộ snapshot, chuẩn hóa dữ liệu trong database và xuất lại các tệp Sitemap/Robots:</p>';
+    echo '<form method="post">';
+    wp_nonce_field( 'digilens_resync' );
+    submit_button( 'Đồng bộ lại toàn bộ Database & Tái tạo SEO Files', 'primary button-hero', 'digilens_resync' );
+    echo '</form>';
+    echo '</div>';
+
+    echo '</div>';
 }

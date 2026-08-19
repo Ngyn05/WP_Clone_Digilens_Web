@@ -13,6 +13,7 @@ require_once DIGILENS_THEME_DIR . '/inc/forms.php';
 require_once DIGILENS_THEME_DIR . '/inc/header-nav.php';
 require_once DIGILENS_THEME_DIR . '/inc/post-metaboxes.php';
 require_once DIGILENS_THEME_DIR . '/inc/products.php';
+require_once DIGILENS_THEME_DIR . '/inc/sitemap-robots.php';
 
 add_action( 'after_setup_theme', function () {
     add_theme_support( 'title-tag' );
