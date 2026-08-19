@@ -45,6 +45,14 @@ get_header();
             margin: 0 auto;
             color: var(--dl-text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        @media (max-width: 640px) {
+            .dl-store-wrapper {
+                padding: 16px 12px 60px 12px;
+            }
         }
 
         /* 1. Hero Section */
@@ -53,6 +61,12 @@ get_header();
             padding: 20px 10px 35px 10px;
             max-width: 820px;
             margin: 0 auto;
+        }
+
+        @media (max-width: 640px) {
+            .dl-store-hero {
+                padding: 10px 5px 24px 5px;
+            }
         }
 
         .dl-store-badge {
@@ -70,19 +84,20 @@ get_header();
         }
 
         .dl-store-title {
-            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-size: clamp(1.35rem, 5vw, 2.35rem);
             font-weight: 800;
             color: var(--dl-text-main);
             margin: 0 0 12px 0;
-            line-height: 1.25;
+            line-height: 1.28;
             letter-spacing: -0.5px;
+            word-break: break-word;
         }
 
         .dl-store-subtitle {
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--dl-text-muted);
             line-height: 1.6;
-            margin: 0 auto 25px auto;
+            margin: 0 auto 20px auto;
         }
 
         .dl-store-stats {
@@ -95,6 +110,7 @@ get_header();
         @media (max-width: 640px) {
             .dl-store-stats {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
             }
         }
 
@@ -106,15 +122,21 @@ get_header();
             text-align: center;
         }
 
+        @media (max-width: 640px) {
+            .dl-stat-card {
+                padding: 10px 6px;
+            }
+        }
+
         .dl-stat-val {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 800;
             color: var(--dl-primary-dark);
             margin-bottom: 2px;
         }
 
         .dl-stat-lbl {
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             color: var(--dl-text-light);
             font-weight: 500;
         }
@@ -126,13 +148,15 @@ get_header();
             justify-content: center;
             flex-wrap: wrap;
             gap: 8px;
-            margin: 30px 0 35px 0;
+            margin: 25px 0 32px 0;
             padding: 6px;
             background: #f1f5f9;
             border-radius: 10px;
             width: fit-content;
             margin-left: auto;
             margin-right: auto;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .dl-filter-btn {
@@ -157,17 +181,54 @@ get_header();
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         }
 
+        @media (max-width: 640px) {
+            .dl-filter-bar {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                background: transparent;
+                padding: 0;
+                margin: 16px 0 24px 0;
+            }
+            .dl-filter-btn {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                padding: 10px 8px !important;
+                font-size: 0.8rem !important;
+                font-weight: 700;
+                color: #475569;
+                line-height: 1.3;
+                min-height: 44px;
+                box-sizing: border-box;
+            }
+            .dl-filter-btn.active {
+                background: #0f172a;
+                color: #ffffff !important;
+                border-color: #0f172a;
+                box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+            }
+        }
+
         /* 3. Product Cards Grid */
         .dl-products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
             gap: 24px;
             margin-bottom: 50px;
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 640px) {
             .dl-products-grid {
                 grid-template-columns: 1fr;
+                gap: 16px;
+                margin-bottom: 35px;
             }
         }
 
@@ -203,6 +264,13 @@ get_header();
             box-sizing: border-box;
         }
 
+        @media (max-width: 640px) {
+            .dl-card-img-wrap {
+                height: 210px;
+                padding: 10px;
+            }
+        }
+
         .dl-card-img-link {
             display: flex;
             align-items: center;
@@ -218,6 +286,12 @@ get_header();
             max-height: 220px;
             object-fit: contain !important;
             transition: transform 0.35s ease;
+        }
+
+        @media (max-width: 640px) {
+            .dl-card-img {
+                max-height: 190px;
+            }
         }
 
         .dl-product-card:hover .dl-card-img {
@@ -249,6 +323,12 @@ get_header();
             justify-content: space-between;
         }
 
+        @media (max-width: 640px) {
+            .dl-card-body {
+                padding: 16px 14px;
+            }
+        }
+
         .dl-card-cat {
             font-size: 0.75rem;
             font-weight: 700;
@@ -270,6 +350,12 @@ get_header();
             margin: 0 0 8px 0;
             line-height: 1.35;
             transition: color 0.2s ease;
+        }
+
+        @media (max-width: 640px) {
+            .dl-card-title {
+                font-size: 1.05rem;
+            }
         }
 
         .dl-card-title-link:hover .dl-card-title {
@@ -319,13 +405,19 @@ get_header();
             border-top: 1px solid #f1f5f9;
         }
 
+        @media (max-width: 360px) {
+            .dl-card-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .dl-btn-detail {
             background: #ffffff;
             color: var(--dl-text-main);
             border: 1px solid #cbd5e1;
-            padding: 9px 12px;
+            padding: 10px 12px;
             border-radius: 8px;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             font-weight: 700;
             text-align: center;
             text-decoration: none;
@@ -345,9 +437,9 @@ get_header();
             background: var(--dl-dark-btn);
             color: #ffffff;
             border: 1px solid var(--dl-dark-btn);
-            padding: 9px 12px;
+            padding: 10px 12px;
             border-radius: 8px;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             font-weight: 700;
             text-align: center;
             text-decoration: none;
@@ -373,6 +465,14 @@ get_header();
             border-radius: 12px;
             padding: 24px;
             margin-top: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .dl-guarantee-bar {
+                grid-template-columns: 1fr;
+                gap: 14px;
+                padding: 18px 14px;
+            }
         }
 
         .dl-guarantee-col {
@@ -411,6 +511,12 @@ get_header();
             transition: opacity 0.2s ease;
         }
 
+        @media (max-width: 640px) {
+            .dl-modal-overlay {
+                padding: 10px;
+            }
+        }
+
         .dl-modal-overlay.active {
             display: flex;
             opacity: 1;
@@ -430,6 +536,14 @@ get_header();
             transition: transform 0.2s ease;
             padding: 30px;
             box-sizing: border-box;
+        }
+
+        @media (max-width: 640px) {
+            .dl-modal-container {
+                padding: 22px 14px;
+                border-radius: 14px;
+                max-height: 92vh;
+            }
         }
 
         .dl-modal-overlay.active .dl-modal-container {
@@ -548,9 +662,10 @@ get_header();
             margin-bottom: 12px;
         }
 
-        @media (max-width: 500px) {
+        @media (max-width: 560px) {
             .dl-cta-top-row {
                 grid-template-columns: 1fr;
+                gap: 10px;
             }
         }
 
@@ -558,9 +673,9 @@ get_header();
             background: linear-gradient(180deg, #1e70bf 0%, #0e4c8d 100%);
             border: 1px solid #0d47a1;
             color: #ffffff !important;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 800;
-            padding: 14px 16px;
+            padding: 13px 16px;
             border-radius: 8px;
             cursor: pointer;
             display: flex;
@@ -601,7 +716,7 @@ get_header();
         }
 
         .dl-cta-quote-title {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -622,6 +737,13 @@ get_header();
             padding: 16px 20px;
             box-shadow: 0 6px 18px rgba(255, 81, 0, 0.3);
             color: #ffffff;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 640px) {
+            .dl-cta-phone-box {
+                padding: 14px 14px;
+            }
         }
 
         .dl-cta-phone-header {
@@ -644,7 +766,7 @@ get_header();
         }
 
         .dl-cta-phone-text {
-            font-size: 0.96rem;
+            font-size: 0.94rem;
             font-weight: 600;
             line-height: 1.4;
             margin: 0;
@@ -660,16 +782,18 @@ get_header();
             border-radius: 6px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            background: #ffffff;
         }
 
         .dl-cta-phone-input {
             flex: 1;
-            padding: 12px 16px;
+            padding: 12px 14px;
             border: none;
             outline: none;
             font-size: 0.95rem;
             color: #0f172a;
             background: #ffffff;
+            min-width: 0;
         }
 
         .dl-cta-phone-input::placeholder {
@@ -680,14 +804,42 @@ get_header();
             background: #8b0000;
             color: #ffffff;
             border: none;
-            padding: 0 24px;
-            font-size: 1rem;
+            padding: 0 22px;
+            font-size: 0.95rem;
             font-weight: 900;
             letter-spacing: 0.5px;
             cursor: pointer;
             text-transform: uppercase;
             transition: background 0.2s ease;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dl-cta-btn-send:hover {
+            background: #a00000;
+        }
+
+        @media (max-width: 480px) {
+            .dl-cta-input-group {
+                flex-direction: column;
+                background: transparent;
+                box-shadow: none;
+                border: none;
+                gap: 8px;
+            }
+            .dl-cta-phone-input {
+                border-radius: 6px;
+                width: 100%;
+                box-sizing: border-box;
+                padding: 12px 14px;
+            }
+            .dl-cta-btn-send {
+                width: 100%;
+                padding: 12px 16px;
+                border-radius: 6px;
+            }
         }
 
         .dl-cta-btn-send:hover {
@@ -873,65 +1025,21 @@ get_header();
         </section>
     </main>
 
-    <!-- 5. Product Quick View / Quote Modal Window -->
+    <!-- 5. Product Quote Modal Window -->
     <div class="dl-modal-overlay" id="product-modal">
-        <div class="dl-modal-container">
-            <button type="button" class="dl-modal-close" onclick="closeProductModal()">&times;</button>
-            <div class="dl-modal-header">
+        <div class="dl-modal-container" style="max-width:580px;">
+            <button type="button" class="dl-modal-close" onclick="closeProductModal()" aria-label="Đóng">&times;</button>
+            <div class="dl-modal-header" style="margin-bottom:16px;">
                 <span class="dl-modal-cat" id="modal-cat">Danh mục</span>
-                <h2 class="dl-modal-title" id="modal-title">Tên sản phẩm</h2>
+                <h2 class="dl-modal-title" id="modal-title" style="margin-bottom:6px;">Tên sản phẩm</h2>
                 <div id="modal-stock-badge">
                     <span class="dl-stock-badge in-stock"><span class="dl-stock-dot"></span> Còn hàng</span>
                 </div>
             </div>
 
             <div class="dl-modal-body">
-                <div style="margin-bottom:18px;">
-                    <a id="modal-ref-link" href="#" class="dl-btn-detail" style="display:inline-flex;padding:6px 14px;font-size:0.88rem;" target="_blank" rel="noopener">
-                        <span id="modal-ref-text">Xem bài giới thiệu chính thức trên Website</span> →
-                    </a>
-                </div>
-
-                <!-- 3 Action CTA Cluster -->
-                <div class="dl-cta-cluster">
-                    <div class="dl-cta-top-row">
-                        <a href="https://zalo.me/0917834532" target="_blank" rel="noopener noreferrer" class="dl-cta-btn-consult">
-                            TƯ VẤN NGAY
-                        </a>
-                        <button type="button" class="dl-cta-btn-quote" onclick="focusQuoteForm()">
-                            <span class="dl-cta-quote-title">BÁO GIÁ</span>
-                            <span class="dl-cta-quote-sub">(Được dùng thử trước khi thanh toán)</span>
-                        </button>
-                    </div>
-
-                    <!-- Orange Callout Box -->
-                    <div class="dl-cta-phone-box">
-                        <div class="dl-cta-phone-header">
-                            <div class="dl-cta-phone-icon-wrap">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                            </div>
-                            <p class="dl-cta-phone-text">
-                                Hãy để lại <strong>số điện thoại</strong>, chúng tôi sẽ gọi ngay cho bạn <strong>tư vấn miễn phí!</strong>
-                            </p>
-                        </div>
-                        <form class="dl-cta-input-group" onsubmit="handleQuickPhoneSubmit(event)">
-                            <input type="tel" id="quick-phone-input" class="dl-cta-phone-input" placeholder="Nhập sđt tư vấn miễn phí" required />
-                            <button type="submit" class="dl-cta-btn-send" id="btn-quick-phone-send">GỬI ĐI</button>
-                        </form>
-                        <div class="dl-phone-quick-success" id="quick-phone-success"></div>
-                    </div>
-                </div>
-
-                <!-- Technical Specs Table -->
-                <div class="dl-modal-section-title">THÔNG SỐ KỸ THUẬT CHI TIẾT</div>
-                <table class="dl-specs-table" id="modal-specs"></table>
-
-                <!-- Highlights List -->
-                <div class="dl-modal-section-title">ĐẶC ĐIỂM NỔI BẬT</div>
-                <ul id="modal-highlights" style="color:#475569;line-height:1.6;padding-left:18px;margin-bottom:20px;font-size:0.9rem;"></ul>
-
                 <!-- Order / Quotation Form -->
-                <div class="dl-order-form" id="order-form-box">
+                <div class="dl-order-form" id="order-form-box" style="margin-top:0;">
                     <div class="dl-modal-section-title" style="margin-top:0;border-bottom:none;padding-bottom:0;font-size:1.15rem;font-weight:800;color:#0f172a;">GỬI YÊU CẦU BÁO GIÁ & TƯ VẤN DOANH NGHIỆP</div>
                     <p style="color:#64748b;font-size:0.88rem;margin:4px 0 16px 0;">Điền thông tin bên dưới để nhận bảng báo giá chi tiết, hợp đồng mẫu hoặc đăng ký trải nghiệm Demo sản phẩm.</p>
                     <form id="store-order-form" onsubmit="handleOrderSubmit(event)">
@@ -955,8 +1063,8 @@ get_header();
                         </div>
 
                         <div class="dl-form-group">
-                            <label for="order-address">Địa chỉ nhận hàng</label>
-                            <textarea id="order-address" class="dl-form-control" rows="2" placeholder="Nhập địa chỉ nhận hàng hoặc ghi chú liên hệ..."></textarea>
+                            <label for="order-address">Địa chỉ / Ghi chú yêu cầu</label>
+                            <textarea id="order-address" class="dl-form-control" rows="2" placeholder="Nhập địa chỉ nhận hàng hoặc ghi chú thêm..."></textarea>
                         </div>
 
                         <button type="submit" class="dl-submit-btn" id="btn-submit-order">GỬI YÊU CẦU BÁO GIÁ</button>
@@ -966,7 +1074,7 @@ get_header();
                         <h3 style="font-size:1.35rem;margin:0 0 8px 0;color:var(--dl-text-main);">GỬI YÊU CẦU THÀNH CÔNG!</h3>
                         <p style="color:var(--dl-text-muted);font-size:0.92rem;margin-bottom:15px;">
                             Mã đơn hàng: <strong id="success-order-id" style="color:var(--dl-primary);">#DL-<?php echo time(); ?></strong><br>
-                            Chuyên viên tư vấn của DigiLens Việt Nam đã nhận được đơn hàng và sẽ liên hệ lại với bạn trong thời gian sớm nhất!
+                            Chuyên viên tư vấn của DigiLens Việt Nam đã nhận được thông tin và sẽ liên hệ lại với bạn trong thời gian sớm nhất!
                         </p>
                         <button type="button" class="dl-btn-detail" onclick="closeProductModal()" style="padding:10px 24px;margin-top:10px;cursor:pointer;">ĐÓNG CỬA SỔ</button>
                     </div>
@@ -999,60 +1107,37 @@ get_header();
         });
     });
 
-    // Quick View / Quote Modal
+    // Quick Quote Modal
     function openProductModal(prodId) {
         var prod = currentProducts.find(function(p) { return p.id === prodId || p.db_id == prodId; });
         if (!prod) return;
 
         document.getElementById('modal-cat').innerText = prod.category_name;
         document.getElementById('modal-title').innerText = prod.name;
-        var modalImg = document.getElementById('modal-img');
-        if (modalImg) {
-            modalImg.src = prod.image;
-            modalImg.alt = prod.name;
-        }
-
-        // Ref link
-        var refLink = document.getElementById('modal-ref-link');
-        if (prod.ref_url) {
-            refLink.href = prod.ref_url;
-            document.getElementById('modal-ref-text').innerText = prod.ref_title || 'Xem bài giới thiệu chính thức';
-            refLink.style.display = 'inline-flex';
-        } else {
-            refLink.style.display = 'none';
-        }
-
-        // Specs
-        var specsTbody = '';
-        if (prod.specs) {
-            for (var k in prod.specs) {
-                specsTbody += '<tr><td>' + k + '</td><td>' + prod.specs[k] + '</td></tr>';
-            }
-        }
-        document.getElementById('modal-specs').innerHTML = specsTbody;
-
-        // Highlights
-        var hlList = '';
-        if (prod.highlights && prod.highlights.length) {
-            prod.highlights.forEach(function(h) {
-                hlList += '<li>' + h + '</li>';
-            });
-        }
-        document.getElementById('modal-highlights').innerHTML = hlList;
 
         // Pre-fill hidden fields
         document.getElementById('order-product-id').value = prod.db_id || prod.id;
         document.getElementById('order-product-name').value = prod.name;
 
-        // Reset forms
+        // Reset form
         document.getElementById('store-order-form').style.display = 'block';
         document.getElementById('order-success-msg').style.display = 'none';
-        var phoneSuccess = document.getElementById('quick-phone-success');
-        if (phoneSuccess) phoneSuccess.style.display = 'none';
 
         // Show Modal
         var modal = document.getElementById('product-modal');
         modal.classList.add('active');
+
+        var container = document.querySelector('.dl-modal-container');
+        if (container) {
+            container.scrollTop = 0;
+        }
+
+        setTimeout(function() {
+            var phoneInput = document.getElementById('order-phone');
+            if (phoneInput) {
+                phoneInput.focus();
+            }
+        }, 150);
     }
 
     function closeProductModal() {
