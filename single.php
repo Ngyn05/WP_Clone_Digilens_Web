@@ -22,7 +22,9 @@ get_header();
             $source_name   = get_post_meta( $post_id, '_digilens_source_name', true );
             $pdf_url       = get_post_meta( $post_id, '_digilens_pdf_url', true );
             $media_contact = get_post_meta( $post_id, '_digilens_media_contact', true );
-            $external_url  = get_post_meta( $post_id, '_digilens_external_url', true );
+            if ( $media_contact ) {
+                $media_contact = preg_replace( '/[a-zA-Z0-9._%+-]+@(?:digilens|DigiLens)\.[a-zA-Z0-9._%+-]+/i', 'contact@digilens.vn', $media_contact );
+            }
 
             $feat_img = '';
             if ( has_post_thumbnail() ) {

@@ -394,6 +394,68 @@ function digilens_replace_hubspot_forms( $html ) {
     return $html;
 }
 
+function digilens_replace_contact_section( $html ) {
+    $pattern = '#<section\b[^>]*data-id=["\']40b9a0be["\'][^>]*>.*?</section>#is';
+
+    $offices_html = '<section class="elementor-section dl-offices-section" data-id="40b9a0be">
+        <div class="dl-offices-container">
+            <!-- Card 1: Hà Nội -->
+            <div class="dl-office-card">
+                <div class="dl-office-top">
+                    <div class="dl-office-icon-box">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    </div>
+                    <div class="dl-office-badge">MIỀN BẮC</div>
+                </div>
+                <h3 class="dl-office-title">Văn phòng Hà Nội</h3>
+                <div class="dl-office-address">226 Đường Láng, Phường Thịnh Quang, Quận Đống Đa, Hà Nội</div>
+                <a href="tel:02473048700" class="dl-office-phone">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    <span>024.7304.8700</span>
+                </a>
+                <div class="dl-office-map-container">
+                    <iframe 
+                        src="https://maps.google.com/maps?q=226%20%C4%90%C6%B0%E1%BB%9Dng%20L%C3%A1ng%2C%20Th%E1%BB%8Bnh%20Quang%2C%20%C4%90%E1%BB%91ng%20%C4%90a%2C%20H%C3%A0%20N%E1%BB%99i&amp;t=m&amp;z=16&amp;output=embed&amp;iwloc=near" 
+                        loading="lazy" 
+                        title="Bản đồ Văn phòng Hà Nội"
+                        class="dl-office-map-iframe">
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Card 2: Hồ Chí Minh -->
+            <div class="dl-office-card">
+                <div class="dl-office-top">
+                    <div class="dl-office-icon-box">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    </div>
+                    <div class="dl-office-badge">MIỀN NAM</div>
+                </div>
+                <h3 class="dl-office-title">Văn phòng Hồ Chí Minh</h3>
+                <div class="dl-office-address">137 Hòa Hưng, Phường Hòa Hưng, TP. Hồ Chí Minh</div>
+                <a href="tel:02873048700" class="dl-office-phone">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    <span>028.7304.8700</span>
+                </a>
+                <div class="dl-office-map-container">
+                    <iframe 
+                        src="https://maps.google.com/maps?q=137%20H%C3%B2a%20H%C6%B0ng%2C%20Ph%C6%B0%E1%BB%9Dng%20H%C3%B2a%20H%C6%B0ng%2C%20TP.%20H%E1%BB%93%20Ch%C3%AD%20Minh&amp;t=m&amp;z=16&amp;output=embed&amp;iwloc=near" 
+                        loading="lazy" 
+                        title="Bản đồ Văn phòng Hồ Chí Minh"
+                        class="dl-office-map-iframe">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>';
+
+    if ( preg_match( $pattern, $html ) ) {
+        $html = preg_replace( $pattern, $offices_html, $html, 1 );
+    }
+
+    return $html;
+}
+
 function digilens_fix_pagination( $html, $snapshot_rel ) {
     $script = '<script>
     (function() {
@@ -817,13 +879,25 @@ function digilens_inject_embedded_videos( $html ) {
     );
 }
 
+function digilens_standardize_all_emails( $html ) {
+    // 1. Standardize all mailto links to contact@digilens.vn
+    $html = preg_replace( '#mailto:[a-zA-Z0-9._%+-]+@(?:digilens|DigiLens)\.[a-zA-Z0-9._%+-]+#i', 'mailto:contact@digilens.vn', $html );
+
+    // 2. Standardize all visible digilens email addresses in HTML text
+    $html = preg_replace( '#\b[a-zA-Z0-9._%+-]+@(?:digilens|DigiLens)\.(?:com|vn)\b#i', 'contact@digilens.vn', $html );
+
+    return $html;
+}
+
 function digilens_rewrite_snapshot_html( $html, $snapshot_rel ) {
     $html = digilens_strip_cookie_consent( $html );
     $html = digilens_replace_entire_header( $html );
     $html = digilens_replace_entire_footer( $html );
     $html = digilens_inject_dynamic_media_widgets( $html );
     $html = digilens_replace_hubspot_forms( $html );
+    $html = digilens_replace_contact_section( $html );
     $html = digilens_inject_embedded_videos( $html );
+    $html = digilens_standardize_all_emails( $html );
     $html = digilens_fix_pagination( $html, $snapshot_rel );
 
     // 0. Strip broken speculation rules and emoji scripts from snapshot

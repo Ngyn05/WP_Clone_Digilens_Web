@@ -173,9 +173,9 @@ function digilens_render_post_settings_box( $post ) {
             <div class="dl-admin-field-row" style="margin-bottom:0;">
                 <label for="dl_media_contact" class="dl-admin-label">
                     <strong>6. Liên hệ truyền thông &amp; Báo chí (Media Contact)</strong>
-                    <span class="dl-admin-desc">Ví dụ: Brian Hamilton (brian.hamilton@digilens.com)</span>
+                    <span class="dl-admin-desc">Ví dụ: Ban Truyền thông (contact@digilens.vn)</span>
                 </label>
-                <input type="text" id="dl_media_contact" name="dl_media_contact" value="<?php echo esc_attr( $media_contact ); ?>" class="dl-admin-input" placeholder="Brian Hamilton (press@digilens.com)" />
+                <input type="text" id="dl_media_contact" name="dl_media_contact" value="<?php echo esc_attr( $media_contact ); ?>" class="dl-admin-input" placeholder="Ban Truyền thông (contact@digilens.vn)" />
             </div>
         </div>
 

@@ -29,6 +29,21 @@ add_action( 'after_setup_theme', function () {
 add_filter( 'use_block_editor_for_post', '__return_false', 10 );
 add_filter( 'use_block_editor_for_post_type', '__return_false', 10 );
 
+// Standardize all content and excerpt emails to contact@digilens.vn
+add_filter( 'the_content', function( $content ) {
+    if ( function_exists( 'digilens_standardize_all_emails' ) ) {
+        return digilens_standardize_all_emails( $content );
+    }
+    return $content;
+}, 99 );
+
+add_filter( 'the_excerpt', function( $excerpt ) {
+    if ( function_exists( 'digilens_standardize_all_emails' ) ) {
+        return digilens_standardize_all_emails( $excerpt );
+    }
+    return $excerpt;
+}, 99 );
+
 // Output Favicons in <head> for all dynamic pages
 add_action( 'wp_head', function () {
     $icon_32    = get_template_directory_uri() . '/snapshot/wp-content/uploads/2025/06/New-Site-Icon-v3-150x150.png';

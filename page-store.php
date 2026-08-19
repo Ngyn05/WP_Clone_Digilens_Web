@@ -945,7 +945,7 @@ get_header();
                             </div>
                             <div class="dl-form-group">
                                 <label for="order-email">Địa chỉ Email</label>
-                                <input type="email" id="order-email" class="dl-form-control" placeholder="contact@company.com" />
+                                <input type="email" id="order-email" class="dl-form-control" placeholder="contact@digilens.vn" />
                             </div>
                         </div>
 

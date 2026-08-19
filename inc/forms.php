@@ -9,10 +9,13 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
- * Configure global sender name for all outgoing emails
+ * Configure global sender name and email for all outgoing emails
  */
 add_filter( 'wp_mail_from_name', function( $name ) {
     return 'DigiLens Việt Nam';
+} );
+add_filter( 'wp_mail_from', function( $email ) {
+    return 'contact@digilens.vn';
 } );
 
 function digilens_form_redirect( $type ) {
