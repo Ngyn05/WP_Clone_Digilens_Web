@@ -400,6 +400,62 @@ function digilens_replace_entire_footer( $html ) {
         return preg_replace( $fallback_pattern, $new_footer, $html, 1 );
     }
 
+function digilens_fix_pagination( $html, $snapshot_rel ) {
+    // 1. Chuẩn hóa link phân trang tuyệt đối cho trang media và archives
+    if ( preg_match( '#^media(?:/(\d+))?#i', $snapshot_rel ) ) {
+        $html = preg_replace_callback( '#(<nav\b[^>]*class=["\'][^"\']*elementor-pagination[^"\']*["\'][^>]*>)(.*?)(</nav>)#is', function( $matches ) {
+            $nav_open = $matches[1];
+            $nav_body = $matches[2];
+            $nav_close = $matches[3];
+
+            $nav_body = preg_replace_callback( '#href=["\']([^"\']+)["\']#i', function( $hm ) {
+                $raw_href = $hm[1];
+                if ( preg_match( '#(?:\.\./)?(\d+)(?:/index\.htm|/)?$#i', $raw_href, $pm ) ) {
+                    $page_num = (int) $pm[1];
+                    $target = ( $page_num === 1 ) ? home_url( '/media/' ) : home_url( '/media/' . $page_num . '/' );
+                    return 'href="' . esc_url( $target ) . '"';
+                }
+                if ( preg_match( '#(?:\.\./)?index\.htm$#i', $raw_href ) || $raw_href === '../' ) {
+                    return 'href="' . esc_url( home_url( '/media/' ) ) . '"';
+                }
+                return $hm[0];
+            }, $nav_body );
+
+            return $nav_open . $nav_body . $nav_close;
+        }, $html );
+    }
+
+    // 2. Chèn script chặn AJAX của Elementor trên mọi thanh phân trang để chuyển trang tức thì
+    $script = '<script>
+    (function() {
+        function enablePaginationClick() {
+            var links = document.querySelectorAll(".elementor-pagination a, .ast-pagination a, a.page-numbers");
+            links.forEach(function(link) {
+                if (link._pagBound) return;
+                link._pagBound = true;
+                link.addEventListener("click", function(e) {
+                    var target = this.getAttribute("href");
+                    if (target && target !== "#" && !target.startsWith("javascript:")) {
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        window.location.href = target;
+                    }
+                }, true);
+            });
+        }
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", enablePaginationClick);
+        } else {
+            enablePaginationClick();
+        }
+        window.addEventListener("load", enablePaginationClick);
+    })();
+    </script>';
+
+    if ( strpos( $html, 'elementor-pagination' ) !== false || strpos( $html, 'page-numbers' ) !== false ) {
+        $html = str_replace( '</body>', $script . "\n</body>", $html );
+    }
+
     return $html;
 }
 
@@ -408,6 +464,7 @@ function digilens_rewrite_snapshot_html( $html, $snapshot_rel ) {
     $html = digilens_replace_entire_footer( $html );
     $html = digilens_replace_main_content( $html, $snapshot_rel );
     $html = digilens_replace_hubspot_forms( $html );
+    $html = digilens_fix_pagination( $html, $snapshot_rel );
 
     // Exact original-domain asset roots inside JS/CSS strings.
     $asset_roots = array( 'wp-content/', 'wp-includes/', 'forms/', 'gtag/', '@googlemaps/', 's/', 'af/', 'count/' );

@@ -1,7 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'DIGILENS_THEME_VERSION', '1.2.3' );
+define( 'DIGILENS_THEME_VERSION', '1.2.4' );
 define( 'DIGILENS_THEME_DIR', get_template_directory() );
 define( 'DIGILENS_THEME_URI', get_template_directory_uri() );
 define( 'DIGILENS_SNAPSHOT_DIR', DIGILENS_THEME_DIR . '/snapshot' );

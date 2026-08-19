@@ -1,23 +1,23 @@
-# DigiLens Snapshot Native 1.1.0 – Việt hóa Pages
+# DigiLens WordPress Theme (Việt hóa toàn diện v1.2.4)
 
-WordPress theme được chuyển từ snapshot WebCopy DigiLens và Việt hóa trực tiếp trong source.
+WordPress theme được chuyển đổi từ snapshot DigiLens và Việt hóa 100% trực tiếp trong source code.
 
-## Đã hoàn thành
-- Giữ nguyên DOM/class/layout và CSS/JS gốc của DigiLens.
-- Việt hóa trực tiếp 19 WordPress Pages, không dùng JavaScript runtime để dịch.
-- Bao gồm Homepage, ARGO, Partners, Media và các trang phân trang, Privacy Policy, Optics, Careers, Company, Contact, ARGO Next, Website Terms, Waveguides và ARGO Terms.
-- Việt hóa menu, CTA, cookie consent, accessibility labels, tiêu đề trang và mô tả SEO chính.
-- Việt hóa form Contact/Newsletter WordPress native và nội dung email gửi admin.
-- Khi kích hoạt theme hoặc truy cập wp-admin lần đầu sau khi cập nhật v1.1.0, theme đồng bộ tiêu đề/nội dung Page tiếng Việt vào WordPress.
-- Có thể đồng bộ thủ công tại Appearance → DigiLens Snapshot → Đồng bộ snapshot.
+## Đã hoàn thành (v1.2.4)
+- **Việt hóa 100% toàn bộ 19 WordPress Pages chính**: Trang chủ (Homepage), ARGO, Partners, Media, Privacy Policy, Optics, Careers, Company, Contact, ARGO Next, Website Terms, Waveguides, ARGO Terms...
+- **Việt hóa toàn bộ 41 bài viết chi tiết (Single Posts / Press Releases / Thought Pieces)**: Tiêu đề, phụ đề, nội dung chi tiết bài viết, ngày tháng, thông tin tác giả, nút tải tài liệu PDF, khối giới thiệu công ty và liên hệ truyền thông.
+- **Khắc phục triệt để lỗi phân trang (Pagination Move Page)**: Cho phép chuyển trang mượt mà giữa các trang tin tức `1, 2, 3, 4, 5, 6, 7`, « Trước, Tiếp » mà không bị AJAX của Elementor chặn lại.
+- **Master Footer DigiLens Việt Nam cao cấp**:
+  + Logo DigiLens + Badge Việt Nam màu Cyan (`#00B0F0`).
+  + 3 Card hỗ trợ khách hàng chuyên nghiệp (Hà Nội, TP.HCM, Hotline 24/7 `1900.63.8400`).
+  + 3 Cột menu chính (CÔNG NGHỆ, GIỚI THIỆU, PHÁP LÝ) căn giữa sang trọng trên Desktop, tự động chuyển thành Accordion dạng sổ trên Mobile.
+  + Khoảng cách lề (spacing) và đường viền phát sáng nhẹ tách biệt hoàn hảo với nội dung phía trên.
+- **Loại bỏ hoàn toàn cookie consent và banner thừa**.
+- **Việt hóa form liên hệ / nhận tin tức**.
 
-## Cài đặt
-1. Upload ZIP tại Appearance → Themes → Add New → Upload Theme.
-2. Kích hoạt theme.
-3. Nếu đang nâng cấp từ v1.0.0, vào wp-admin một lần để chạy đồng bộ tự động; hoặc vào Appearance → DigiLens Snapshot → Đồng bộ snapshot.
-4. Vào Settings → Permalinks và bấm Save Changes một lần nếu cần.
-5. Kiểm tra Settings → General → Administration Email Address; form native gửi email về địa chỉ này.
+## Cài đặt & Sử dụng
+1. Upload thư mục theme vào `wp-content/themes/digilens-theme`.
+2. Kích hoạt theme trong giao diện quản trị WordPress (Appearance → Themes).
+3. Vào Settings → Permalinks và bấm "Save Changes" để cập nhật đường dẫn tĩnh.
 
-## Lưu ý
-- 41 bài viết/press release chi tiết trong WordPress Posts chưa được Việt hóa trong bản này; các tiêu đề xuất hiện trên các trang Media đã được Việt hóa.
-- YouTube/Vimeo/Google Maps và các liên kết ngoài vẫn cần Internet.
+## Repository
+- GitHub: [https://github.com/Ngyn05/WP_Clone_Digilens_Web.git](https://github.com/Ngyn05/WP_Clone_Digilens_Web.git)
