@@ -428,30 +428,21 @@ function digilens_fix_pagination( $html, $snapshot_rel ) {
         }, $html );
     }
 
-    // 2. Chèn script chặn AJAX của Elementor trên mọi thanh phân trang để chuyển trang tức thì
+    // 2. Chèn script bắt sự kiện ở window capture phase để chuyển trang tức thì, vô hiệu hóa AJAX chặn click
     $script = '<script>
     (function() {
-        function enablePaginationClick() {
-            var links = document.querySelectorAll(".elementor-pagination a, .ast-pagination a, a.page-numbers");
-            links.forEach(function(link) {
-                if (link._pagBound) return;
-                link._pagBound = true;
-                link.addEventListener("click", function(e) {
-                    var target = this.getAttribute("href");
-                    if (target && target !== "#" && !target.startsWith("javascript:")) {
-                        e.stopPropagation();
-                        e.stopImmediatePropagation();
-                        window.location.href = target;
-                    }
-                }, true);
-            });
-        }
-        if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", enablePaginationClick);
-        } else {
-            enablePaginationClick();
-        }
-        window.addEventListener("load", enablePaginationClick);
+        window.addEventListener("click", function(e) {
+            var link = e.target ? (e.target.closest ? e.target.closest(".elementor-pagination a, .ast-pagination a, a.page-numbers") : null) : null;
+            if (link) {
+                var href = link.getAttribute("href");
+                if (href && href !== "#" && !href.startsWith("javascript:")) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    window.location.href = href;
+                }
+            }
+        }, true);
     })();
     </script>';
 

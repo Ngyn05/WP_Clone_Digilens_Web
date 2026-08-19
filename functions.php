@@ -1,7 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'DIGILENS_THEME_VERSION', '1.2.4' );
+define( 'DIGILENS_THEME_VERSION', '1.2.5' );
 define( 'DIGILENS_THEME_DIR', get_template_directory() );
 define( 'DIGILENS_THEME_URI', get_template_directory_uri() );
 define( 'DIGILENS_SNAPSHOT_DIR', DIGILENS_THEME_DIR . '/snapshot' );
@@ -25,6 +25,16 @@ add_action( 'wp_enqueue_scripts', function () {
     // The captured site CSS/JS remains loaded from the original snapshot markup.
     wp_enqueue_style( 'digilens-theme', get_stylesheet_uri(), array(), DIGILENS_THEME_VERSION );
 }, 100 );
+
+add_action( 'template_redirect', function () {
+    if ( is_admin() ) { return; }
+    $snapshot = digilens_snapshot_for_current_request();
+    if ( $snapshot ) {
+        status_header( 200 );
+        digilens_render_snapshot( $snapshot );
+        exit;
+    }
+}, 1 );
 
 add_filter( 'redirect_canonical', function ( $redirect_url ) {
     return digilens_snapshot_for_current_request() ? false : $redirect_url;
