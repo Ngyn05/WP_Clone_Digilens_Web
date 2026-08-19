@@ -139,18 +139,32 @@ function digilens_rewrite_url( $url, $snapshot_rel ) {
     return $original;
 }
 
-function digilens_replace_main_content( $html, $snapshot_rel ) {
-    $post_id = get_queried_object_id();
-    if ( ! $post_id || get_post_meta( $post_id, '_digilens_snapshot_path', true ) !== $snapshot_rel ) { return $html; }
-    $content = get_post_field( 'post_content', $post_id );
-    if ( $content === '' ) { return $html; }
-    $replacement = do_shortcode( $content );
-    return preg_replace_callback(
-        '#(<main\b[^>]*>)(.*?)(</main>)#is',
-        function ( $m ) use ( $replacement ) { return $m[1] . $replacement . $m[3]; },
-        $html,
-        1
+function digilens_translate_header( $html ) {
+    $replacements = array(
+        '>Waveguides<'                          => '>Ống dẫn sóng<',
+        '>WAVEGUIDES<'                          => '>Ống dẫn sóng<',
+        '>Partners<'                            => '>Đối tác<',
+        '>PARTNERS<'                            => '>Đối tác<',
+        '>About<'                               => '>Giới thiệu<',
+        '>ABOUT<'                               => '>Giới thiệu<',
+        '>Developer Portal<'                    => '>Cổng thông tin nhà phát triển<',
+        '>DEVELOPER PORTAL<'                    => '>Cổng thông tin nhà phát triển<',
+        '>Company<'                             => '>Công ty<',
+        '>Media Center<'                        => '>Trung tâm truyền thông<',
+        '>Careers<'                             => '>Tuyển dụng<',
+        '>Contact<'                             => '>Liên hệ<',
+        'aria-label="Site Navigation: Primary"'  => 'aria-label="Điều hướng website: Điều hướng chính"',
+        'aria-label="Main Menu"'                => 'aria-label="Menu chính"',
+        'aria-label="Toggle Dropdown Menu"'      => 'aria-label="Mở/đóng menu"',
+        '<span class="screen-reader-text">Main Menu</span>'   => '<span class="screen-reader-text">Menu chính</span>',
+        '<span class="screen-reader-text">Toggle Menu</span>' => '<span class="screen-reader-text">Mở/đóng menu</span>',
     );
+    return str_replace( array_keys( $replacements ), array_values( $replacements ), $html );
+}
+
+function digilens_replace_main_content( $html, $snapshot_rel ) {
+    // By default, serve the fully translated snapshot directly.
+    return apply_filters( 'digilens_serve_snapshot_main', $html, $snapshot_rel );
 }
 
 function digilens_native_form_markup( $type = 'contact' ) {
@@ -458,6 +472,7 @@ function digilens_fix_pagination( $html, $snapshot_rel ) {
 
 function digilens_rewrite_snapshot_html( $html, $snapshot_rel ) {
     $html = digilens_strip_cookie_consent( $html );
+    $html = digilens_translate_header( $html );
     $html = digilens_replace_entire_footer( $html );
     $html = digilens_replace_main_content( $html, $snapshot_rel );
     $html = digilens_replace_hubspot_forms( $html );

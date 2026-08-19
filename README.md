@@ -1,10 +1,12 @@
-# DigiLens WordPress Theme (Việt hóa toàn diện v1.2.4)
+# DigiLens WordPress Theme (Việt hóa toàn diện v1.2.6)
 
 WordPress theme được chuyển đổi từ snapshot DigiLens và Việt hóa 100% trực tiếp trong source code.
 
-## Đã hoàn thành (v1.2.4)
+## Đã hoàn thành (v1.2.6)
 - **Việt hóa 100% toàn bộ 19 WordPress Pages chính**: Trang chủ (Homepage), ARGO, Partners, Media, Privacy Policy, Optics, Careers, Company, Contact, ARGO Next, Website Terms, Waveguides, ARGO Terms...
-- **Việt hóa toàn bộ 41 bài viết chi tiết (Single Posts / Press Releases / Thought Pieces)**: Tiêu đề, phụ đề, nội dung chi tiết bài viết, ngày tháng, thông tin tác giả, nút tải tài liệu PDF, khối giới thiệu công ty và liên hệ truyền thông.
+- **Việt hóa 100% toàn bộ 41 bài viết chi tiết (Single Posts / Press Releases / Thought Pieces)**: Tiêu đề, phụ đề, nội dung chi tiết bài viết, ngày tháng, thông tin tác giả, nút tải tài liệu PDF, khối giới thiệu công ty và liên hệ truyền thông.
+- **Việt hóa 100% toàn bộ 15 trang lưu trữ tác giả & 20 trang lưu trữ chuyên mục**: Toàn bộ tiêu đề bài viết truyền thông/video bên ngoài (CNET, YouTube, Forbes, VentureBeat, Auganix, Mixed-News, Embedded.com, The AR Show, AWE...), thẻ meta Yoast SEO, breadcrumb, tiêu đề danh mục/tác giả, phân trang (`« Trước`, `Tiếp »`, `Trang X / Y`), nút `Đọc thêm »`, và ngày tháng tiếng Việt.
+- **Tự động đồng bộ WordPress Database (v1.2.6)**: Cập nhật hàm `snapshot-importer.php` tự động đồng bộ cả Pages và Posts với tiêu đề & nội dung tiếng Việt vào cơ sở dữ liệu WordPress khi import/resync.
 - **Khắc phục triệt để lỗi phân trang (Pagination Move Page)**: Cho phép chuyển trang mượt mà giữa các trang tin tức `1, 2, 3, 4, 5, 6, 7`, « Trước, Tiếp » mà không bị AJAX của Elementor chặn lại.
 - **Master Footer DigiLens Việt Nam cao cấp**:
   + Logo DigiLens + Badge Việt Nam màu Cyan (`#00B0F0`).

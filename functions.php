@@ -1,7 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'DIGILENS_THEME_VERSION', '1.2.5' );
+define( 'DIGILENS_THEME_VERSION', '1.2.6' );
 define( 'DIGILENS_THEME_DIR', get_template_directory() );
 define( 'DIGILENS_THEME_URI', get_template_directory_uri() );
 define( 'DIGILENS_SNAPSHOT_DIR', DIGILENS_THEME_DIR . '/snapshot' );
@@ -58,8 +58,7 @@ add_action( 'admin_menu', function () {
  * This keeps wp-admin Page titles/content aligned with the translated snapshot
  * without using any runtime JavaScript translation.
  */
-add_action( 'admin_init', function () {
-    if ( ! current_user_can( 'manage_options' ) ) { return; }
+add_action( 'init', function () {
     if ( get_option( 'digilens_vi_page_sync_version' ) === DIGILENS_THEME_VERSION ) { return; }
     if ( function_exists( 'digilens_snapshot_import_all' ) ) {
         digilens_snapshot_import_all();

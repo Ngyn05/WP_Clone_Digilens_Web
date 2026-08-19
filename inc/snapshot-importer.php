@@ -28,7 +28,7 @@ function digilens_snapshot_find_existing_by_meta( $rel, $post_type ) {
 }
 
 function digilens_snapshot_import_all() {
-    if ( ! current_user_can( 'manage_options' ) && ! doing_action( 'after_switch_theme' ) ) { return array( 0, 0 ); }
+    if ( ! current_user_can( 'manage_options' ) && ! doing_action( 'after_switch_theme' ) && ! doing_action( 'init' ) ) { return array( 0, 0 ); }
 
     $files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( DIGILENS_SNAPSHOT_DIR, FilesystemIterator::SKIP_DOTS ) );
     $records = array();
@@ -105,8 +105,8 @@ function digilens_snapshot_import_all() {
             }
             $post_id = wp_insert_post( wp_slash( $postarr ) );
             if ( is_wp_error( $post_id ) || ! $post_id ) { continue; }
-        } elseif ( ! $is_post ) {
-            // Keep existing WordPress Pages synchronized with the translated snapshot.
+        } else {
+            // Keep existing WordPress Pages and Posts synchronized with the translated snapshot.
             // Slugs/permalinks stay unchanged; only title, content and parent are refreshed.
             wp_update_post( wp_slash( array(
                 'ID'           => $post_id,
