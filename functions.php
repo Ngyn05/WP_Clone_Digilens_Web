@@ -15,6 +15,7 @@ require_once DIGILENS_THEME_DIR . '/inc/post-metaboxes.php';
 require_once DIGILENS_THEME_DIR . '/inc/products.php';
 require_once DIGILENS_THEME_DIR . '/inc/sitemap-robots.php';
 require_once DIGILENS_THEME_DIR . '/inc/schema.php';
+require_once DIGILENS_THEME_DIR . '/inc/floating-contact.php';
 
 add_action( 'after_setup_theme', function () {
     add_theme_support( 'title-tag' );
