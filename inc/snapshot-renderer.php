@@ -31,6 +31,15 @@ function digilens_snapshot_candidates_for_request() {
 function digilens_snapshot_for_current_request() {
     if ( is_admin() ) { return false; }
 
+    // 1. Ưu tiên kiểm tra file snapshot theo đúng đường dẫn REQUEST_URI thực tế
+    foreach ( digilens_snapshot_candidates_for_request() as $rel ) {
+        $rel = digilens_normalize_snapshot_path( $rel );
+        if ( is_file( DIGILENS_SNAPSHOT_DIR . '/' . $rel ) && preg_match( '/\.htm$/i', $rel ) ) {
+            return $rel;
+        }
+    }
+
+    // 2. Fallback về post meta nếu không match trực tiếp từ URI
     $post_id = get_queried_object_id();
     if ( $post_id ) {
         $meta = get_post_meta( $post_id, '_digilens_snapshot_path', true );
@@ -41,12 +50,6 @@ function digilens_snapshot_for_current_request() {
         }
     }
 
-    foreach ( digilens_snapshot_candidates_for_request() as $rel ) {
-        $rel = digilens_normalize_snapshot_path( $rel );
-        if ( is_file( DIGILENS_SNAPSHOT_DIR . '/' . $rel ) && preg_match( '/\.htm$/i', $rel ) ) {
-            return $rel;
-        }
-    }
     return false;
 }
 
