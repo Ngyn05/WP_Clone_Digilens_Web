@@ -1541,3 +1541,12 @@ section[data-id="45d131d5"] .elementor-shape-bottom,
     }
 }
 
+/* Hide removed buttons */
+.elementor-element-486dbcd,
+.elementor-element-3c24a88,
+.elementor-element-4d8c580,
+.elementor-element-b002b93,
+.elementor-element-a363164 {
+    display: none !important;
+}
+
